@@ -14,7 +14,8 @@ public:
   reader(const std::string& filename) :
     filename_(filename),
     delimiter_(","),
-    newline_("\r\n") {
+    newline_("\r\n"),
+    columns_(0) {
     done_future_ = done_promise_.get_future();
     thread_ = std::thread(&reader::process_values, this, &done_future_);
     read_file();
@@ -38,28 +39,43 @@ private:
     char ch;
     std::fstream stream(filename_, std::fstream::in);
     std::string current;
+    bool first_row = true;
     while (stream >> std::noskipws >> ch) {
-
-      // Handle delimiter & line terminator
-      auto cases = std::vector<std::string>{delimiter_, newline_};
-      for (size_t i = 0; i < cases.size(); i++) {
-        for (size_t j = 0; j < cases[i].size(); j++) {
-          if (ch == cases[i][j]) {
-            if (j + 1 == cases[i].size()) {
-              values_.enqueue(current);
-              current = "";
-              stream >> std::noskipws >> ch;
-            }
-            else {
-              stream >> std::noskipws >> ch;
-            }
-          } 
-          else { 
-            break;
+      // Handle delimiter
+      for (size_t i = 0; i < delimiter_.size(); i++) {
+        if (ch == delimiter_[i]) {
+          if (i + 1 == delimiter_.size()) {
+            if (first_row) columns_ += 1;
+            values_.enqueue(current);
+            current = "";
+            stream >> std::noskipws >> ch;
           }
-        }        
+          else {
+            stream >> std::noskipws >> ch;
+          }
+        } 
+        else { 
+          break;
+        }
       }
-
+      // Handle newline
+      for (size_t i = 0; i < newline_.size(); i++) {
+        if (ch == newline_[i]) {
+          if (i + 1 == newline_.size()) {
+            if (first_row) columns_ += 1;
+            values_.enqueue(current);
+            current = "";
+            stream >> std::noskipws >> ch;
+            if (first_row) first_row = false;
+          }
+          else {
+            stream >> std::noskipws >> ch;
+          }
+        } 
+        else { 
+          break;
+        }
+      }
       // Base case
       current += ch;
     }
@@ -80,6 +96,7 @@ private:
   std::string filename_;
   std::string delimiter_;
   std::string newline_;
+  size_t columns_;
   std::thread thread_;
   std::promise<bool> done_promise_;
   std::future<bool> done_future_;

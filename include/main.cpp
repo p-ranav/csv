@@ -1,6 +1,6 @@
 #include <csv.hpp>
 
 int main() {
-  csv::reader reader("large.csv");
+  csv::reader reader("test.csv");
   return 0;
 }
