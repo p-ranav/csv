@@ -47,28 +47,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <chrono>
 #include <mutex>
 #include <condition_variable>
+#include <any>
 
 namespace csv {
-
-// Upsert into std::map
-template <class KeyType, class ElementType>
-bool upsert(std::map<KeyType, ElementType>& aMap, 
-  KeyType const& aKey, ElementType const& aNewValue) {
-  typedef typename std::map<KeyType, ElementType>::iterator Iterator;
-  typedef typename std::pair<Iterator, bool> Result;
-  Result tResult = aMap.insert(
-    typename std::map<KeyType, ElementType>::value_type(aKey, aNewValue));
-  if (!tResult.second) {
-    if (!(tResult.first->second == aNewValue)) {
-      tResult.first->second = aNewValue;
-      return true;
-    }
-    else
-      return false; // it was the same
-  }
-  else
-    return true;  // changed cause not existing
-}
 
 class reader {
 public:
@@ -83,12 +64,15 @@ public:
     thread_.join();
   }
 
-  size_t rows() {
-    return rows_.size();
-  }
-
-  std::vector<std::map<std::string, std::string>> dict() {
-    return rows_;
+  bool parse(const std::string& filename) {
+    filename_ = filename;
+    done_future_ = done_promise_.get_future();
+    thread_ = std::thread(&reader::process_values, this, &done_future_);
+    read_file();
+    done();
+    std::unique_lock<std::mutex> lock(ready_mutex_);
+    while (!ready_) ready_cv_.wait(lock);
+    return true;
   }
 
   reader& configure() {
@@ -100,15 +84,17 @@ public:
     return *this;
   }
 
-  bool parse(const std::string& filename) {
-    filename_ = filename;
-    done_future_ = done_promise_.get_future();
-    thread_ = std::thread(&reader::process_values, this, &done_future_);
-    read_file();
-    done();
-    std::unique_lock<std::mutex> lock(ready_mutex_);
-    while (!ready_) ready_cv_.wait(lock);
-    return true;
+  reader& newline(const std::string& newline) {
+    newline_ = newline;
+    return *this;
+  }
+
+  std::pair<size_t, size_t> shape() {
+    return {rows_.size(), headers_.size()};
+  }
+
+  std::vector<std::map<std::string, std::any>> dict() {
+    return rows_;
   }
 
 private:
@@ -168,7 +154,7 @@ private:
 
   void process_values(std::future<bool> * future_object) {
     size_t header_index = 0;
-    std::map<std::string, std::string> row;
+    std::map<std::string, std::any> row;
     while(true) {
       std::string value;
       if (front(value)) {
@@ -177,8 +163,7 @@ private:
           header_index += 1;
         }
         else {
-          upsert<std::string, std::string>(row, 
-            headers_[header_index % headers_.size()], value);
+          row[headers_[header_index % headers_.size()]] = value;
           header_index += 1;
           if (header_index % headers_.size() == 0) {
             rows_.push_back(row);
@@ -203,7 +188,7 @@ private:
   std::string newline_;
   size_t columns_;
   std::vector<std::string> headers_;
-  std::vector<std::map<std::string, std::string>> rows_;
+  std::vector<std::map<std::string, std::any>> rows_;
   bool ready_;
   std::condition_variable ready_cv_;
   std::mutex ready_mutex_;

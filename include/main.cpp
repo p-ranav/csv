@@ -1,13 +1,14 @@
 #include <csv.hpp>
 
 int main() {
-  csv::reader reader;
+  csv::reader foo;
 
-  reader.configure()
-    .delimiter(", ");
+  foo.configure()
+    .delimiter(",")
+    .newline("\r\n");
 
-  if (reader.parse("test.csv")) {
-    std::cout << "Rows: " << reader.rows() << std::endl;
+  if (foo.parse("test.csv")) {
+    std::cout << "Rows: " << foo.shape().first << std::endl;
   }
 
   return 0;
