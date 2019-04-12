@@ -50,29 +50,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace csv {
 
-  // trim white spaces from the left end of an input string
-std::string ltrim(std::string input) {
-  std::string result = input;
-  result.erase(result.begin(), std::find_if(result.begin(), result.end(), [](int ch) {
-    return !std::isspace(ch);
-  }));
-  return result;
-}
-
-// trim white spaces from right end of an input string
-std::string rtrim(std::string input) {
-  std::string result = input;
-  result.erase(std::find_if(result.rbegin(), result.rend(), [](int ch) {
-    return !std::isspace(ch);
-  }).base(), result.end());
-  return result;
-}
-
-// trim white spaces from either end of an input string
-std::string trim(std::string input) {
-  return ltrim(rtrim(input));
-}
-
 class reader {
 public:
   reader() :
@@ -230,6 +207,29 @@ private:
         break;
       }
     }
+  }
+
+  // trim white spaces from the left end of an input string
+  std::string ltrim(std::string input) {
+    std::string result = input;
+    result.erase(result.begin(), std::find_if(result.begin(), result.end(), [](int ch) {
+      return !std::isspace(ch);
+    }));
+    return result;
+  }
+
+  // trim white spaces from right end of an input string
+  std::string rtrim(std::string input) {
+    std::string result = input;
+    result.erase(std::find_if(result.rbegin(), result.rend(), [](int ch) {
+      return !std::isspace(ch);
+    }).base(), result.end());
+    return result;
+  }
+
+  // trim white spaces from either end of an input string
+  std::string trim(std::string input) {
+    return ltrim(rtrim(input));
   }
 
   std::string filename_;
