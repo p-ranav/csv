@@ -1,16 +1,16 @@
 #include <csv.hpp>
 
 int main() {
-  csv::reader foo;
+  csv::reader csv;
 
-  foo.configure_dialect()
-    .delimiter(", ")
+  csv.configure_dialect()
+    .delimiter(" ")
     .newline("\r\n")
-    .quotechar('"')
+    .quotechar('|')
     .trim_whitespace(true);
 
-  if (foo.parse("quoted.csv")) {
-    for (auto& row : foo.rows()) {
+  if (csv.parse("quoted.csv")) {
+    for (auto& row : csv.rows()) {
       for (auto& [k, v] : row) {
         std::cout << k << ": " << v << std::endl;
       }
