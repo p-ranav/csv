@@ -76,7 +76,7 @@ public:
     return true;
   }
 
-  reader& configure_dialect() {
+  reader& register_dialect() {
     return *this;
   }
 
@@ -118,8 +118,8 @@ private:
   }
 
   void read_file() {
-    char ch;
     std::fstream stream(filename_, std::fstream::in);
+    char ch;
     std::string current;
     bool first_row = true;
     size_t quotes_encountered = 0;
