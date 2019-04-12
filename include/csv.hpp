@@ -52,10 +52,12 @@ namespace csv {
 
 // Upsert into std::map
 template <class KeyType, class ElementType>
-bool upsert(std::map<KeyType, ElementType>& aMap, KeyType const& aKey, ElementType const& aNewValue) {
+bool upsert(std::map<KeyType, ElementType>& aMap, 
+  KeyType const& aKey, ElementType const& aNewValue) {
   typedef typename std::map<KeyType, ElementType>::iterator Iterator;
   typedef typename std::pair<Iterator, bool> Result;
-  Result tResult = aMap.insert(typename std::map<KeyType, ElementType>::value_type(aKey, aNewValue));
+  Result tResult = aMap.insert(
+    typename std::map<KeyType, ElementType>::value_type(aKey, aNewValue));
   if (!tResult.second) {
     if (!(tResult.first->second == aNewValue)) {
       tResult.first->second = aNewValue;
@@ -171,8 +173,10 @@ private:
           }
         }
       }
-      const auto future_status = future_object->wait_for(std::chrono::seconds(0));
-      if (future_status == std::future_status::ready && values_.size_approx() == 0) {
+      const auto future_status = 
+        future_object->wait_for(std::chrono::seconds(0));
+      if (future_status == std::future_status::ready && 
+          values_.size_approx() == 0) {
         std::unique_lock<std::mutex> lock(ready_mutex_);
         ready_ = true;
         ready_cv_.notify_all();
