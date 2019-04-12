@@ -3,7 +3,7 @@
 int main() {
   csv::reader foo;
 
-  foo.register_dialect()
+  foo.configure_dialect()
     .delimiter(",")
     .newline("\r\n")
     .quote('"')

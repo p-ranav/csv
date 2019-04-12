@@ -76,7 +76,7 @@ public:
     return true;
   }
 
-  reader& register_dialect() {
+  reader& configure_dialect() {
     return *this;
   }
 
