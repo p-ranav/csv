@@ -4,9 +4,10 @@ int main() {
   csv::reader foo;
 
   foo.dialect()
-    .delimiter(", ")
+    .delimiter(",")
     .newline("\r\n")
-    .quote('"');
+    .quote('"')
+    .trim_whitespace(true);
 
   if (foo.parse("quoted.csv")) {
     std::cout << "Rows: " << foo.shape().first << std::endl;

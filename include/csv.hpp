@@ -50,6 +50,29 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace csv {
 
+  // trim white spaces from the left end of an input string
+std::string ltrim(std::string input) {
+  std::string result = input;
+  result.erase(result.begin(), std::find_if(result.begin(), result.end(), [](int ch) {
+    return !std::isspace(ch);
+  }));
+  return result;
+}
+
+// trim white spaces from right end of an input string
+std::string rtrim(std::string input) {
+  std::string result = input;
+  result.erase(std::find_if(result.rbegin(), result.rend(), [](int ch) {
+    return !std::isspace(ch);
+  }).base(), result.end());
+  return result;
+}
+
+// trim white spaces from either end of an input string
+std::string trim(std::string input) {
+  return ltrim(rtrim(input));
+}
+
 class reader {
 public:
   reader() :
@@ -57,6 +80,7 @@ public:
     delimiter_(","),
     newline_("\r\n"),
     quote_('"'),
+    trim_whitespace_(false),
     columns_(0),
     ready_(false) {}
 
@@ -94,6 +118,11 @@ public:
     return *this;
   }
 
+  reader& trim_whitespace(bool trim_whitespace) {
+    trim_whitespace_ = trim_whitespace;
+    return *this;
+  }
+
   std::pair<size_t, size_t> shape() {
     return {rows_.size(), headers_.size()};
   }
@@ -128,7 +157,7 @@ private:
             // If not, then don't considered the delimiter
             if (quotes_encountered % 2 == 0) {
               if (first_row) columns_ += 1;
-              values_.enqueue(current);
+              values_.enqueue(trim_whitespace_ ? trim(current) : current);
               current = "";
               stream >> std::noskipws >> ch;
               quotes_encountered = 0;
@@ -152,7 +181,7 @@ private:
         if (ch == newline_[i]) {
           if (i + 1 == newline_.size()) {
             if (first_row) columns_ += 1;
-            values_.enqueue(current);
+            values_.enqueue(trim_whitespace_ ? trim(current) : current);
             current = "";
             stream >> std::noskipws >> ch;
             if (first_row) first_row = false;
@@ -207,6 +236,7 @@ private:
   std::string delimiter_;
   std::string newline_;
   char quote_;
+  bool trim_whitespace_;
   size_t columns_;
   std::vector<std::string> headers_;
   std::vector<std::map<std::string, std::string>> rows_;
