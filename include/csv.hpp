@@ -41,6 +41,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <map>
 #include <thread>
 #include <future>
@@ -100,12 +101,16 @@ public:
     return *this;
   }
 
-  std::pair<size_t, size_t> shape() {
-    return {rows_.size(), headers_.size()};
+  std::vector<std::map<std::string, std::string>> rows() {
+    return rows_;
   }
 
-  std::vector<std::map<std::string, std::string>> dict() {
-    return rows_;
+  template <typename T>
+  T get(size_t row, const std::string& key) {
+    std::stringstream stream(rows_[row][key]);
+    T result = T();
+    stream >> result;
+    return result;
   }
 
 private:
@@ -145,6 +150,9 @@ private:
             }
           }
           else {
+            if (quotes_encountered % 2 != 0) {
+              current += ch;
+            }
             stream >> std::noskipws >> ch;
           }
         } 
@@ -171,6 +179,7 @@ private:
           break;
         }
       }
+
       // Base case
       current += ch;
       if (ch == quotechar_)

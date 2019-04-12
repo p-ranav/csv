@@ -4,13 +4,18 @@ int main() {
   csv::reader foo;
 
   foo.configure_dialect()
-    .delimiter(",")
+    .delimiter(", ")
     .newline("\r\n")
     .quotechar('"')
     .trim_whitespace(true);
 
   if (foo.parse("quoted.csv")) {
-    std::cout << "Rows: " << foo.shape().first << std::endl;
+    for (auto& row : foo.rows()) {
+      for (auto& [k, v] : row) {
+        std::cout << k << ": " << v << std::endl;
+      }
+      std::cout << "-----------\n";
+    }
   }
 
   return 0;
