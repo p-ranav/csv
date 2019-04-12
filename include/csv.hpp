@@ -28,6 +28,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <map>
@@ -46,7 +47,7 @@ public:
     delimiter_(","),
     newline_("\r\n"),
     quotechar_('"'),
-    trim_whitespace_(false),
+    trim_characters_({}),
     columns_(0),
     ready_(false) {}
 
@@ -84,9 +85,15 @@ public:
     return *this;
   }
 
-  reader& trim_whitespace(bool trim_whitespace) {
-    trim_whitespace_ = trim_whitespace;
-    return *this;
+  // Base case for trim_characters parameter packing
+  void trim_characters() {}
+
+  // Parameter packed trim_characters method
+  // Accepts a variadic number of characters
+  template<typename T, typename... Targs>
+  void trim_characters(T character, Targs... Fargs) {
+    trim_characters_.push_back(character);
+    trim_characters(Fargs...);
   }
 
   std::vector<std::map<std::string, std::string>> rows() {
@@ -127,7 +134,7 @@ private:
             // If not, then don't considered the delimiter
             if (quotes_encountered % 2 == 0) {
               if (first_row) columns_ += 1;
-              values_.enqueue(trim_whitespace_ ? trim(current) : current);
+              values_.enqueue(trim(current));
               current = "";
               stream >> std::noskipws >> ch;
               quotes_encountered = 0;
@@ -154,7 +161,7 @@ private:
         if (ch == newline_[i]) {
           if (i + 1 == newline_.size()) {
             if (first_row) columns_ += 1;
-            values_.enqueue(trim_whitespace_ ? trim(current) : current);
+            values_.enqueue(trim(current));
             current = "";
             stream >> std::noskipws >> ch;
             if (first_row) first_row = false;
@@ -173,6 +180,8 @@ private:
       if (ch == quotechar_)
         quotes_encountered += 1;
     }
+    if (current != "")
+      values_.enqueue(current);
   }
 
   void process_values(std::future<bool> * future_object) {
@@ -209,8 +218,9 @@ private:
   // trim white spaces from the left end of an input string
   std::string ltrim(std::string input) {
     std::string result = input;
-    result.erase(result.begin(), std::find_if(result.begin(), result.end(), [](int ch) {
-      return !std::isspace(ch);
+    result.erase(result.begin(), std::find_if(result.begin(), result.end(), [=](int ch) {
+      return !(std::find(trim_characters_.begin(), trim_characters_.end(), ch) 
+        != trim_characters_.end());
     }));
     return result;
   }
@@ -218,8 +228,9 @@ private:
   // trim white spaces from right end of an input string
   std::string rtrim(std::string input) {
     std::string result = input;
-    result.erase(std::find_if(result.rbegin(), result.rend(), [](int ch) {
-      return !std::isspace(ch);
+    result.erase(std::find_if(result.rbegin(), result.rend(), [=](int ch) {
+      return !(std::find(trim_characters_.begin(), trim_characters_.end(), ch) 
+        != trim_characters_.end());
     }).base(), result.end());
     return result;
   }
@@ -233,7 +244,7 @@ private:
   std::string delimiter_;
   std::string newline_;
   char quotechar_;
-  bool trim_whitespace_;
+  std::vector<char> trim_characters_;
   size_t columns_;
   std::vector<std::string> headers_;
   std::vector<std::map<std::string, std::string>> rows_;
