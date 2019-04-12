@@ -47,7 +47,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <chrono>
 #include <mutex>
 #include <condition_variable>
-#include <any>
 
 namespace csv {
 
@@ -57,6 +56,7 @@ public:
     filename_(""),
     delimiter_(","),
     newline_("\r\n"),
+    quote_('"'),
     columns_(0),
     ready_(false) {}
 
@@ -75,7 +75,7 @@ public:
     return true;
   }
 
-  reader& configure() {
+  reader& dialect() {
     return *this;
   }
 
@@ -89,11 +89,16 @@ public:
     return *this;
   }
 
+  reader& quote(char quote) {
+    quote_ = quote;
+    return *this;
+  }
+
   std::pair<size_t, size_t> shape() {
     return {rows_.size(), headers_.size()};
   }
 
-  std::vector<std::map<std::string, std::any>> dict() {
+  std::vector<std::map<std::string, std::string>> dict() {
     return rows_;
   }
 
@@ -111,15 +116,27 @@ private:
     std::fstream stream(filename_, std::fstream::in);
     std::string current;
     bool first_row = true;
+    size_t quotes_encountered = 0;
     while (stream >> std::noskipws >> ch) {
+
       // Handle delimiter
       for (size_t i = 0; i < delimiter_.size(); i++) {
         if (ch == delimiter_[i]) {
           if (i + 1 == delimiter_.size()) {
-            if (first_row) columns_ += 1;
-            values_.enqueue(current);
-            current = "";
-            stream >> std::noskipws >> ch;
+            // Make sure that an even number of quotes have been 
+            // encountered so far
+            // If not, then don't considered the delimiter
+            if (quotes_encountered % 2 == 0) {
+              if (first_row) columns_ += 1;
+              values_.enqueue(current);
+              current = "";
+              stream >> std::noskipws >> ch;
+              quotes_encountered = 0;
+            }
+            else {
+              current += ch;
+              stream >> std::noskipws >> ch;
+            }
           }
           else {
             stream >> std::noskipws >> ch;
@@ -129,6 +146,7 @@ private:
           break;
         }
       }
+
       // Handle newline
       for (size_t i = 0; i < newline_.size(); i++) {
         if (ch == newline_[i]) {
@@ -149,12 +167,14 @@ private:
       }
       // Base case
       current += ch;
+      if (ch == quote_)
+        quotes_encountered += 1;
     }
   }
 
   void process_values(std::future<bool> * future_object) {
     size_t header_index = 0;
-    std::map<std::string, std::any> row;
+    std::map<std::string, std::string> row;
     while(true) {
       std::string value;
       if (front(value)) {
@@ -186,9 +206,10 @@ private:
   std::string filename_;
   std::string delimiter_;
   std::string newline_;
+  char quote_;
   size_t columns_;
   std::vector<std::string> headers_;
-  std::vector<std::map<std::string, std::any>> rows_;
+  std::vector<std::map<std::string, std::string>> rows_;
   bool ready_;
   std::condition_variable ready_cv_;
   std::mutex ready_mutex_;

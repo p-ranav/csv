@@ -3,12 +3,19 @@
 int main() {
   csv::reader foo;
 
-  foo.configure()
-    .delimiter(",")
-    .newline("\r\n");
+  foo.dialect()
+    .delimiter(", ")
+    .newline("\r\n")
+    .quote('"');
 
-  if (foo.parse("test.csv")) {
+  if (foo.parse("quoted.csv")) {
     std::cout << "Rows: " << foo.shape().first << std::endl;
+    for (auto& rows : foo.dict()) {
+      for (auto& [k, v] : rows) {
+        std::cout << k << ": " << v << std::endl;
+      }
+      std::cout << "----------------" << std::endl;
+    }
   }
 
   return 0;
