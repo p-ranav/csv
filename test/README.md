@@ -1,4 +1,4 @@
-# Argparse Tests
+# CSV Tests
 
 ## Linux
 
@@ -20,6 +20,6 @@ $ cd build
 $ cmake ../. -G "Visual Studio 15 2017"
 ```
 
-2. Open ARGPARSE.sln
+2. Open CSV.sln
 3. Build tests in RELEASE | x64
 4. Run tests.exe
