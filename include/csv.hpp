@@ -72,19 +72,12 @@ bool upsert(std::map<KeyType, ElementType>& aMap,
 
 class reader {
 public:
-  reader(const std::string& filename) :
-    filename_(filename),
+  reader() :
+    filename_(""),
     delimiter_(","),
     newline_("\r\n"),
     columns_(0),
-    ready_(false) {
-    done_future_ = done_promise_.get_future();
-    thread_ = std::thread(&reader::process_values, this, &done_future_);
-    read_file();
-    done();
-    std::unique_lock<std::mutex> lock(ready_mutex_);
-    while (!ready_) ready_cv_.wait(lock);
-  }
+    ready_(false) {}
 
   ~reader() {
     thread_.join();
@@ -96,6 +89,26 @@ public:
 
   std::vector<std::map<std::string, std::string>> dict() {
     return rows_;
+  }
+
+  reader& configure() {
+    return *this;
+  }
+
+  reader& delimiter(const std::string& delimiter) {
+    delimiter_ = delimiter;
+    return *this;
+  }
+
+  bool parse(const std::string& filename) {
+    filename_ = filename;
+    done_future_ = done_promise_.get_future();
+    thread_ = std::thread(&reader::process_values, this, &done_future_);
+    read_file();
+    done();
+    std::unique_lock<std::mutex> lock(ready_mutex_);
+    while (!ready_) ready_cv_.wait(lock);
+    return true;
   }
 
 private:
