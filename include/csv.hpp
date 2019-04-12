@@ -56,7 +56,7 @@ public:
     filename_(""),
     delimiter_(","),
     newline_("\r\n"),
-    quote_('"'),
+    quotechar_('"'),
     trim_whitespace_(false),
     columns_(0),
     ready_(false) {}
@@ -90,8 +90,8 @@ public:
     return *this;
   }
 
-  reader& quote(char quote) {
-    quote_ = quote;
+  reader& quotechar(char quotechar) {
+    quotechar_ = quotechar;
     return *this;
   }
 
@@ -173,7 +173,7 @@ private:
       }
       // Base case
       current += ch;
-      if (ch == quote_)
+      if (ch == quotechar_)
         quotes_encountered += 1;
     }
   }
@@ -235,7 +235,7 @@ private:
   std::string filename_;
   std::string delimiter_;
   std::string newline_;
-  char quote_;
+  char quotechar_;
   bool trim_whitespace_;
   size_t columns_;
   std::vector<std::string> headers_;
