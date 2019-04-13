@@ -41,6 +41,7 @@ This csv library comes with three standard dialects:
 Custom dialects can be constructed with ```.configure_dialect(...)```
 
 ```cpp
+csv::Reader csv;
 csv.configure_dialect("my fancy dialect")
   .delimiter("")
   .line_terminator("")
@@ -50,6 +51,10 @@ csv.configure_dialect("my fancy dialect")
   .trim_characters(' ', '\t')    // parameter packed
   .ignore_columns("foo", "bar")  // parameter packed
   .header(true)
+
+if (csv.read("foo.csv") {
+  // do something
+}
 ```
 
 | Property | Data Type | Description |
