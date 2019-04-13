@@ -20,8 +20,7 @@ TEST_CASE("Parse headers with pairs of single-quotes", "[simple csv]") {
   csv::reader csv;
 
   csv.configure()
-    .quote_character('\'')
-    .double_quote(true);
+    .quote_character('\'');
 
   if (csv.parse("inputs/test_07.csv")) {
     auto rows = csv.rows();

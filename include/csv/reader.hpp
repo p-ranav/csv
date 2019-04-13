@@ -51,7 +51,7 @@ public:
     line_terminator_("\r\n"),
 #endif
     quote_character_('"'),
-    double_quote_(false),
+    double_quote_(true),
     trim_characters_({}),
     columns_(0),
     ready_(false) {}
@@ -145,9 +145,8 @@ private:
           if (i + 1 == delimiter_.size()) {
             // Make sure that an even number of quotes have been 
             // encountered so far
-            // If not, then don't considered the delimiter
-            if ((!double_quote_ && quotes_encountered % 2 == 0) ||
-                (double_quote_ && quotes_encountered % 4 == 0)) {
+            // If not, then don't consider the delimiter
+            if (quotes_encountered % 2 == 0) {
               if (first_row) columns_ += 1;
               values_.enqueue(trim(current));
               current = "";
@@ -160,8 +159,7 @@ private:
             }
           }
           else {
-            if ((!double_quote_ && quotes_encountered % 2 != 0) ||
-                (double_quote_ && quotes_encountered % 4 != 0)) {
+            if (quotes_encountered % 2 != 0) {
               current += ch;
             }
             stream >> std::noskipws >> ch;
@@ -195,6 +193,11 @@ private:
       current += ch;
       if (ch == quote_character_)
         quotes_encountered += 1;
+      if (ch == quote_character_ && 
+          double_quote_ && 
+          current.size() >= 2 && 
+          current[current.size() - 2] == ch)
+        quotes_encountered -= 1;
     }
     if (current != "")
       values_.enqueue(trim(current));
