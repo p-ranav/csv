@@ -50,7 +50,8 @@ public:
 #else
     line_terminator_("\r\n"),
 #endif
-    quotechar_('"'),
+    quote_character_('"'),
+    double_quote_(false),
     trim_characters_({}),
     columns_(0),
     ready_(false) {}
@@ -84,8 +85,13 @@ public:
     return *this;
   }
 
-  reader& quotechar(char quotechar) {
-    quotechar_ = quotechar;
+  reader& quote_character(char quote_character) {
+    quote_character_ = quote_character;
+    return *this;
+  }
+
+  reader& double_quote(bool double_quote) {
+    double_quote_ = double_quote;
     return *this;
   }
 
@@ -136,7 +142,8 @@ private:
             // Make sure that an even number of quotes have been 
             // encountered so far
             // If not, then don't considered the delimiter
-            if (quotes_encountered % 2 == 0) {
+            if ((!double_quote_ && quotes_encountered % 2 == 0) ||
+                (double_quote_ && quotes_encountered % 4 == 0)) {
               if (first_row) columns_ += 1;
               values_.enqueue(trim(current));
               current = "";
@@ -149,7 +156,8 @@ private:
             }
           }
           else {
-            if (quotes_encountered % 2 != 0) {
+            if ((!double_quote_ && quotes_encountered % 2 == 0) ||
+              (double_quote_ && quotes_encountered % 4 == 0)) {
               current += ch;
             }
             stream >> std::noskipws >> ch;
@@ -181,7 +189,7 @@ private:
 
       // Base case
       current += ch;
-      if (ch == quotechar_)
+      if (ch == quote_character_)
         quotes_encountered += 1;
     }
     if (current != "")
@@ -247,7 +255,8 @@ private:
   std::string filename_;
   std::string delimiter_;
   std::string line_terminator_;
-  char quotechar_;
+  char quote_character_;
+  bool double_quote_;
   std::vector<char> trim_characters_;
   size_t columns_;
   std::vector<std::string> headers_;
