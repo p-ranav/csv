@@ -17,7 +17,7 @@ To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv
 
 int main() {
   csv::Reader csv;
-  if (csv.parse("test.csv")) {
+  if (csv.read("test.csv")) {
     for (auto& row : csv.rows()) {
       auto foo = row["foo"];
       auto bar = row["bar"];
@@ -85,7 +85,7 @@ csv.configure_dialect("my strange dialect")
   .delimiter("::")
   .trim_characters(' ', '[', ']', '{', '}');   
 
-if (csv.parse("test.csv")) {
+if (csv.read("test.csv")) {
   for (auto& row : csv.rows()) {
     auto thread_id = row["Thread ID"];
     auto log_level = row["Log Level"];
@@ -113,7 +113,7 @@ csv.configure_dialect("ignore meh and fez")
   .delimiter(", ")
   .ignore_columns("meh", "fez");
 
-if (csv.parse("test.csv")) {
+if (csv.read("test.csv")) {
   auto rows = csv.rows();
   // Your rows are:
   // [{"foo": "1", "bar": "2", "baz": "4"},
