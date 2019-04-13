@@ -46,6 +46,7 @@ struct dialect {
   std::string line_terminator_;
   char quote_character_;
   bool double_quote_;
+  std::vector<std::string> ignore_columns_;
   std::vector<char> trim_characters_;
   bool header_;
 
@@ -98,6 +99,20 @@ struct dialect {
   dialect& trim_characters(T character, Targs... Fargs) {
     trim_characters_.push_back(character);
     trim_characters(Fargs...);
+    return *this;
+  }
+
+  // Base case for ignore_columns parameter packing
+  dialect& ignore_columns() {
+    return *this;
+  }
+
+  // Parameter packed trim_characters method
+  // Accepts a variadic number of columns
+  template<typename T, typename... Targs>
+  dialect& ignore_columns(T column, Targs... Fargs) {
+    ignore_columns_.push_back(column);
+    ignore_columns(Fargs...);
     return *this;
   }
 
@@ -237,7 +252,11 @@ private:
         if (!dialect_.header_ && index < columns_) {
           headers_.push_back(std::to_string(headers_.size()));
           auto column_name = headers_[index % headers_.size()];
-          row[headers_[index % headers_.size()]] = value;
+          if (dialect_.ignore_columns_.size() == 0 ||
+            (std::find(dialect_.ignore_columns_.begin(),
+              dialect_.ignore_columns_.end(), column_name) == dialect_.ignore_columns_.end())) {
+            row[column_name] = value;
+          }
           index += 1;
         }
         else {
@@ -256,6 +275,11 @@ private:
             row[headers_[index % headers_.size()]] = value;
             index += 1;
             if (dialect_.header_ && row.size() > 0 && headers_.size() > 0 && index % headers_.size() == 0) {
+              if (dialect_.ignore_columns_.size() > 0) {
+                for (size_t i = 0; i < dialect_.ignore_columns_.size(); i++) {
+                  row.erase(dialect_.ignore_columns_[i]);
+                }
+              }
               rows_.push_back(row);
               row.clear(); 
             }
