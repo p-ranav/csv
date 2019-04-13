@@ -185,7 +185,7 @@ private:
         quotes_encountered += 1;
     }
     if (current != "")
-      values_.enqueue(current);
+      values_.enqueue(trim(current));
   }
 
   void process_values(std::future<bool> * future_object) {
