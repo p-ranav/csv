@@ -19,7 +19,8 @@ TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
 
 TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter", "[simple csv]") {
   csv::Reader csv;
-  csv.configure_dialect()
+  auto foo = csv.configure_dialect("test_dialect");
+  csv.configure_dialect("test_dialect")
     .delimiter(", ");
 
   if (csv.parse("inputs/test_02.csv")) {
@@ -36,7 +37,7 @@ TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter", "[simple cs
 
 TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter using skip_initial_space_", "[simple csv]") {
   csv::Reader csv;
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .delimiter(",")
     .skip_initial_space(true);
 
@@ -54,7 +55,7 @@ TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter using skip_in
 
 TEST_CASE("Parse the most basic of CSV buffers with '::' delimiter", "[simple csv]") {
   csv::Reader csv;
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .delimiter("::");
 
   if (csv.parse("inputs/test_03.csv")) {
@@ -72,7 +73,7 @@ TEST_CASE("Parse the most basic of CSV buffers with '::' delimiter", "[simple cs
 TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters", "[simple csv]") {
   csv::Reader csv;
 
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .trim_characters(' ', '\t');
 
   if (csv.parse("inputs/test_02.csv")) {
@@ -90,7 +91,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters", "[
 TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters gone crazy", "[simple csv]") {
   csv::Reader csv;
 
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .trim_characters(' ', '\t');
 
   if (csv.parse("inputs/test_04.csv")) {
@@ -107,7 +108,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters gone
 
 TEST_CASE("Parse the most basic of CSV buffers - Log messages", "[simple csv]") {
   csv::Reader csv;
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .delimiter("::");
   if (csv.parse("inputs/test_05.csv")) {
     auto rows = csv.rows();
@@ -127,7 +128,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Log messages", "[simple csv]") 
 TEST_CASE("Parse the most basic of CSV buffers - No header row", "[simple csv]") {
   csv::Reader csv;
 
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .header(false);
 
   if (csv.parse("inputs/test_08.csv")) {
@@ -148,7 +149,7 @@ TEST_CASE("Parse the most basic of CSV buffers - No header row", "[simple csv]")
 TEST_CASE("Parse the most basic of CSV buffers - Space delimiter", "[simple csv]") {
   csv::Reader csv;
 
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .delimiter(" ");
 
   if (csv.parse("inputs/test_09.csv")) {
@@ -164,7 +165,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Space delimiter", "[simple csv]
 TEST_CASE("Parse the most basic of CSV buffers - Log with header", "[simple csv]") {
   csv::Reader csv;
 
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .delimiter(" :: ")
     .trim_characters('[', ']');
 
@@ -179,5 +180,21 @@ TEST_CASE("Parse the most basic of CSV buffers - Log with header", "[simple csv]
     REQUIRE(rows[1]["Thread ID"] == "02");
     REQUIRE(rows[1]["Log Level"] == "DEBUG");
     REQUIRE(rows[1]["Log Message"] == "Warning! Foo has happened");
+  }
+}
+
+TEST_CASE("Parse Excel CSV", "[simple csv]") {
+  csv::Reader csv;
+  csv.use_dialect("excel");
+
+  if (csv.parse("inputs/test_11_excel.csv")) {
+    auto rows = csv.rows();
+    REQUIRE(rows.size() == 2);
+    REQUIRE(rows[0]["a"] == "1");
+    REQUIRE(rows[0]["b"] == "2");
+    REQUIRE(rows[0]["c"] == "3");
+    REQUIRE(rows[1]["a"] == "4");
+    REQUIRE(rows[1]["b"] == "5");
+    REQUIRE(rows[1]["c"] == "6");
   }
 }

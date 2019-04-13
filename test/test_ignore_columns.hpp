@@ -4,7 +4,7 @@
 
 TEST_CASE("Parse the most basic of CSV buffers and ignore 1 column", "[simple csv]") {
   csv::Reader csv;
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .ignore_columns("a");
 
   if (csv.parse("inputs/test_01.csv")) {
@@ -21,7 +21,7 @@ TEST_CASE("Parse the most basic of CSV buffers and ignore 1 column", "[simple cs
 
 TEST_CASE("Parse the most basic of CSV buffers and ignore 2 columns", "[simple csv]") {
   csv::Reader csv;
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .ignore_columns("a", "b");
 
   if (csv.parse("inputs/test_01.csv")) {
@@ -38,7 +38,7 @@ TEST_CASE("Parse the most basic of CSV buffers and ignore 2 columns", "[simple c
 
 TEST_CASE("Parse the most basic of CSV buffers and ignore all columns", "[simple csv]") {
   csv::Reader csv;
-  csv.configure_dialect()
+  csv.configure_dialect("test_dialect")
     .ignore_columns("a", "b", "c");
 
   if (csv.parse("inputs/test_01.csv")) {

@@ -128,16 +128,58 @@ public:
   Reader() :
     filename_(""),
     columns_(0),
-    ready_(false) {}
+    ready_(false),
+    current_dialect_("excel"),
+    thread_started_(false) {
+    
+    std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
+    unix_dialect
+      ->delimiter(",")
+      .skip_initial_space(true)
+      .line_terminator("\n")
+      .quote_character('"')
+      .double_quote(true)
+      .header(true);
+    dialects_["unix"] = unix_dialect;
+    
+    std::shared_ptr<Dialect> excel_dialect = std::make_shared<Dialect>();
+    excel_dialect
+      ->delimiter(",")
+      .skip_initial_space(false)
+#ifdef _WIN32
+      .line_terminator("\n")
+#else
+      .line_terminator("\r\n")
+#endif
+      .quote_character('"')
+      .double_quote(true)
+      .header(true);
+    dialects_["excel"] = excel_dialect;
+
+    std::shared_ptr<Dialect> excel_tab_dialect = std::make_shared<Dialect>();
+    excel_tab_dialect
+      ->delimiter("\t")
+      .skip_initial_space(false)
+#ifdef _WIN32
+      .line_terminator("\n")
+#else
+      .line_terminator("\r\n")
+#endif
+      .quote_character('"')
+      .double_quote(true)
+      .header(true);
+    dialects_["excel-tab"] = excel_tab_dialect;
+  }
 
   ~Reader() {
-    thread_.join();
+    if (thread_started_) thread_.join();
   }
 
   bool parse(const std::string& filename) {
     filename_ = filename;
     done_future_ = done_promise_.get_future();
     thread_ = std::thread(&Reader::process_values, this, &done_future_);
+    thread_started_ = true;
     parse_internal();
     done();
     std::unique_lock<std::mutex> lock(ready_mutex_);
@@ -145,8 +187,23 @@ public:
     return true;
   }
 
-  Dialect& configure_dialect() {
-    return dialect_;
+  Dialect& configure_dialect(const std::string& dialect_name = "excel") {
+    if (dialect_name != "excel") {
+      std::shared_ptr<Dialect> dialect_object = std::make_shared<Dialect>();
+      dialects_[dialect_name] = dialect_object;
+      current_dialect_ = dialect_name;
+      return *dialect_object;
+    }
+    else {
+      return *dialects_["excel"];
+    }
+  }
+
+  void use_dialect(const std::string& dialect_name) {
+    current_dialect_ = dialect_name;
+    if (dialects_.find(dialect_name) == dialects_.end()) {
+      throw std::runtime_error("error: Dialect " + dialect_name + " not found");
+    }
   }
 
   std::vector<std::map<std::string, std::string>> rows() {
@@ -168,18 +225,26 @@ private:
 
   void parse_internal() {
     std::fstream stream(filename_, std::fstream::in);
+    stream.flags(stream.flags() & ~std::ios_base::skipws);
+    if (!stream.is_open()) {
+      throw std::runtime_error("error: Failed to open " + filename_);
+    }
     char ch;
     std::string current;
     bool first_row = true;
     size_t quotes_encountered = 0;
-    while (stream >> std::noskipws >> ch) {
+    std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
+    if (!dialect) {
+      throw std::runtime_error("error: Dialect " + current_dialect_ + " not found");
+    }
 
+    while (stream >> std::noskipws >> ch) {
       // Handle delimiter
       std::string delimiter_substring = "";
-      for (size_t i = 0; i < dialect_.delimiter_.size(); i++) {
-        if (ch == dialect_.delimiter_[i]) {
+      for (size_t i = 0; i < dialect->delimiter_.size(); i++) {
+        if (ch == dialect->delimiter_[i]) {
           delimiter_substring += ch;
-          if (i + 1 == dialect_.delimiter_.size()) {
+          if (i + 1 == dialect->delimiter_.size()) {
             // Make sure that an even number of quotes have been 
             // encountered so far
             // If not, then don't consider the delimiter
@@ -188,7 +253,7 @@ private:
               values_.enqueue(trim(current));
               current = "";
               stream >> std::noskipws >> ch;
-              if (ch == ' ' && dialect_.skip_initial_space_) {
+              if (ch == ' ' && dialect->skip_initial_space_) {
                 stream >> std::noskipws >> ch;
               }
               quotes_encountered = 0;
@@ -213,10 +278,10 @@ private:
 
       // Handle line_terminator
       std::string line_terminator_substring = "";
-      for (size_t i = 0; i < dialect_.line_terminator_.size(); i++) {
-        if (ch == dialect_.line_terminator_[i]) {
+      for (size_t i = 0; i < dialect->line_terminator_.size(); i++) {
+        if (ch == dialect->line_terminator_[i]) {
           line_terminator_substring += ch;
-          if (i + 1 == dialect_.line_terminator_.size()) {
+          if (i + 1 == dialect->line_terminator_.size()) {
             if (first_row) columns_ += 1;
             values_.enqueue(trim(current));
             current = "";
@@ -235,10 +300,10 @@ private:
 
       // Base case
       current += ch;
-      if (ch == dialect_.quote_character_)
+      if (ch == dialect->quote_character_)
         quotes_encountered += 1;
-      if (ch == dialect_.quote_character_ &&
-          dialect_.double_quote_ &&
+      if (ch == dialect->quote_character_ &&
+          dialect->double_quote_ &&
           current.size() >= 2 && 
           current[current.size() - 2] == ch)
         quotes_encountered -= 1;
@@ -252,24 +317,25 @@ private:
   void process_values(std::future<bool> * future_object) {
     size_t index = 0;
     std::map<std::string, std::string> row;
+    std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
     while(true) {
       std::string value;
       if (front(value)) {
-        if (!dialect_.header_ && index < columns_) {
+        if (!dialect->header_ && index < columns_) {
           headers_.push_back(std::to_string(headers_.size()));
           auto column_name = headers_[index % headers_.size()];
-          if (dialect_.ignore_columns_.size() == 0 ||
-            (std::find(dialect_.ignore_columns_.begin(),
-              dialect_.ignore_columns_.end(), column_name) == dialect_.ignore_columns_.end())) {
+          if (dialect->ignore_columns_.size() == 0 ||
+            (std::find(dialect->ignore_columns_.begin(),
+              dialect->ignore_columns_.end(), column_name) == dialect->ignore_columns_.end())) {
             row[column_name] = value;
           }
           index += 1;
         }
         else {
-          if (!dialect_.header_ && index == columns_) {
+          if (!dialect->header_ && index == columns_) {
             rows_.push_back(row);
             row.clear();
-            dialect_.header_ = true;
+            dialect->header_ = true;
           }
 
           if (index < columns_) {
@@ -280,10 +346,10 @@ private:
             auto column_name = headers_[index % headers_.size()];
             row[headers_[index % headers_.size()]] = value;
             index += 1;
-            if (dialect_.header_ && row.size() > 0 && headers_.size() > 0 && index % headers_.size() == 0) {
-              if (dialect_.ignore_columns_.size() > 0) {
-                for (size_t i = 0; i < dialect_.ignore_columns_.size(); i++) {
-                  row.erase(dialect_.ignore_columns_[i]);
+            if (dialect->header_ && row.size() > 0 && headers_.size() > 0 && index % headers_.size() == 0) {
+              if (dialect->ignore_columns_.size() > 0) {
+                for (size_t i = 0; i < dialect->ignore_columns_.size(); i++) {
+                  row.erase(dialect->ignore_columns_[i]);
                 }
               }
               rows_.push_back(row);
@@ -307,9 +373,10 @@ private:
   // trim white spaces from the left end of an input string
   std::string ltrim(std::string input) {
     std::string result = input;
+    std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
     result.erase(result.begin(), std::find_if(result.begin(), result.end(), [=](int ch) {
-      return !(std::find(dialect_.trim_characters_.begin(), dialect_.trim_characters_.end(), ch)
-        != dialect_.trim_characters_.end());
+      return !(std::find(dialect->trim_characters_.begin(), dialect->trim_characters_.end(), ch)
+        != dialect->trim_characters_.end());
     }));
     return result;
   }
@@ -317,22 +384,23 @@ private:
   // trim white spaces from right end of an input string
   std::string rtrim(std::string input) {
     std::string result = input;
+    std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
     result.erase(std::find_if(result.rbegin(), result.rend(), [=](int ch) {
-      return !(std::find(dialect_.trim_characters_.begin(), dialect_.trim_characters_.end(), ch)
-        != dialect_.trim_characters_.end());
+      return !(std::find(dialect->trim_characters_.begin(), dialect->trim_characters_.end(), ch)
+        != dialect->trim_characters_.end());
     }).base(), result.end());
     return result;
   }
 
   // trim white spaces from either end of an input string
   std::string trim(std::string input) {
-    if (dialect_.trim_characters_.size() == 0)
+    std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
+    if (dialect->trim_characters_.size() == 0)
       return input;
     return ltrim(rtrim(input));
   }
 
   std::string filename_;
-  Dialect dialect_;
   size_t columns_;
   std::vector<std::string> headers_;
   std::vector<std::map<std::string, std::string>> rows_;
@@ -340,9 +408,12 @@ private:
   std::condition_variable ready_cv_;
   std::mutex ready_mutex_;
   std::thread thread_;
+  bool thread_started_;
   std::promise<bool> done_promise_;
   std::future<bool> done_future_;
   moodycamel::ConcurrentQueue<std::string> values_;
+  std::string current_dialect_;
+  std::map<std::string, std::shared_ptr<Dialect>> dialects_;
 };
 
 }
