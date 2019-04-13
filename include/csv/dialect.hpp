@@ -26,6 +26,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 
 namespace csv {
 
@@ -35,7 +36,7 @@ struct Dialect {
   std::string line_terminator_;
   char quote_character_;
   bool double_quote_;
-  std::vector<std::string> ignore_columns_;
+  std::map<std::string, bool> ignore_columns_;
   std::vector<char> trim_characters_;
   bool header_;
 
@@ -100,7 +101,7 @@ struct Dialect {
   // Accepts a variadic number of columns
   template<typename T, typename... Targs>
   Dialect& ignore_columns(T column, Targs... Fargs) {
-    ignore_columns_.push_back(column);
+    ignore_columns_[column] = true;
     ignore_columns(Fargs...);
     return *this;
   }

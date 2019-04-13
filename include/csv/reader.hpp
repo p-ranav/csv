@@ -257,9 +257,7 @@ private:
         if (!dialect->header_ && index < columns_) {
           headers_.push_back(std::to_string(headers_.size()));
           auto column_name = headers_[index % headers_.size()];
-          if (dialect->ignore_columns_.size() == 0 ||
-            (std::find(dialect->ignore_columns_.begin(),
-              dialect->ignore_columns_.end(), column_name) == dialect->ignore_columns_.end())) {
+          if (dialect->ignore_columns_.count(column_name) == 0) {
             row[column_name] = value;
           }
           index += 1;
@@ -281,8 +279,8 @@ private:
             index += 1;
             if (dialect->header_ && row.size() > 0 && headers_.size() > 0 && index % headers_.size() == 0) {
               if (dialect->ignore_columns_.size() > 0) {
-                for (size_t i = 0; i < dialect->ignore_columns_.size(); i++) {
-                  row.erase(dialect->ignore_columns_[i]);
+                for (auto&[key, value] : dialect->ignore_columns_) {
+                  row.erase(key);
                 }
               }
               rows_.push_back(row);
