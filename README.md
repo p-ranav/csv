@@ -15,8 +15,7 @@ reader.configure_dialect()
   .delimiter(", ")
   .line_terminator("\r\n")
   .trim_characters(' ', '\t')
-  .ignore_columns("foo", "bar")
-  .transform_column("baz", [](const std::string& value) { return std::stoi(value); });
+  .ignore_columns("foo", "bar");
 
 if (reader.parse()) {
   for (auto& row : reader.rows()) {
