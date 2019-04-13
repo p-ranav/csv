@@ -198,3 +198,19 @@ TEST_CASE("Parse Excel CSV", "[simple csv]") {
     REQUIRE(rows[1]["c"] == "6");
   }
 }
+
+TEST_CASE("Parse Unix CSV", "[simple csv]") {
+  csv::Reader csv;
+  csv.use_dialect("unix");
+
+  if (csv.parse("inputs/test_12_unix.csv")) {
+    auto rows = csv.rows();
+    REQUIRE(rows.size() == 2);
+    REQUIRE(rows[0]["a"] == "1");
+    REQUIRE(rows[0]["b"] == "2");
+    REQUIRE(rows[0]["c"] == "3");
+    REQUIRE(rows[1]["a"] == "4");
+    REQUIRE(rows[1]["b"] == "5");
+    REQUIRE(rows[1]["c"] == "6");
+  }
+}
