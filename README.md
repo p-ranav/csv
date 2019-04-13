@@ -8,6 +8,10 @@
 
 ## Quick Start
 
+* [CSV Reader](#reading-csv-files)
+
+## Reading CSV files
+
 To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
 
 ```cpp
@@ -43,7 +47,7 @@ csv::reader csv("test.csv");
 
 csv.configure_dialect("my strange dialect")
   .delimiter("::")
-  .trim_characters(' ', '[', ']', '{', '}');
+  .trim_characters(' ', '[', ']', '{', '}');   
 
 if (reader.parse()) {
   for (auto& row : reader.rows()) {
