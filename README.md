@@ -6,7 +6,7 @@
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
-# Reading CSV files
+## Reading CSV files
 
 To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
 
@@ -23,7 +23,7 @@ int main() {
 }
 ```
 
-## Trimming Characters
+### Trimming Characters
 
 Consider this strange, messed up log file: 
 
@@ -55,7 +55,7 @@ if (reader.parse("test.csv")) {
 }
 ```
 
-# Writing CSV files
+## Writing CSV files
 
 ## Supported Compilers
 * GCC >= 7.0.0
