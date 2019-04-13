@@ -2,11 +2,13 @@
 
 ## Highlights
 
-* Header-only library to [read](#reading-csv-files) and [write](#writing-csv-files) CSV files
+* Header-only library to read/write CSV files
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
-## Reading CSV files
+## Quick Start
+
+### Reading CSV files
 
 To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
 
@@ -23,7 +25,7 @@ int main() {
 }
 ```
 
-### Default Dialects
+## Dialects
 
 This csv library comes with three standard dialects:
 
@@ -52,17 +54,15 @@ csv.configure_dialect("my fancy dialect")
 
 | Property | Data Type | Description |
 |--------------------|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| delimiter | std::string | specifies the character sequence which should separate fields (aka columns). Default = "," |
-| line_terminator | std::string | specifies the character sequence which should terminate rows. Default = ```"\r\n"``` |
-| quote_character | char | specifies a one-character string to use as the quoting character. Default = ```'"'``` |
-| double_quote | bool | controls the handling of quotes inside fields. If true, two consecutive quotes should be interpreted as one. Default = ```true``` |
-| skip_initial_space | bool | specifies how to interpret whitespace which immediately follows a delimiter; if false, it means that whitespace immediately after a delimiter should be treated as part of the following field. Default = ```true``` |
-| header | bool | indicates whether the file includes a header row. If true the first row in the file is a header row, not data. Default = ```true``` |
-| trim_characters | std::vector<char> | specifies the list of characters to trim from every value in the CSV. Default = ```{}``` - nothing trimmed |
+| delimiter | ```std::string``` | specifies the character sequence which should separate fields (aka columns). Default = "," |
+| line_terminator | ```std::string``` | specifies the character sequence which should terminate rows. Default = ```"\r\n"``` |
+| quote_character | ```char``` | specifies a one-character string to use as the quoting character. Default = ```'"'``` |
+| double_quote | ```bool``` | controls the handling of quotes inside fields. If true, two consecutive quotes should be interpreted as one. Default = ```true``` |
+| skip_initial_space | ```bool``` | specifies how to interpret whitespace which immediately follows a delimiter; if false, it means that whitespace immediately after a delimiter should be treated as part of the following field. Default = ```true``` |
+| header | ```bool``` | indicates whether the file includes a header row. If true the first row in the file is a header row, not data. Default = ```true``` |
+| trim_characters | ```std::vector<char>``` | specifies the list of characters to trim from every value in the CSV. Default = ```{}``` - nothing trimmed |
 
-## Examples
-
-### Trimming Characters
+## Trimming Characters
 
 Consider this strange, messed up log file: 
 
