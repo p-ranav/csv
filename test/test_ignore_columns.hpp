@@ -48,3 +48,30 @@ TEST_CASE("Parse the most basic of CSV buffers and ignore all columns", "[simple
     REQUIRE(rows[1].size() == 0);
   }
 }
+
+TEST_CASE("Parse the most basic of CSV buffers and ignore age/gender columns", "[simple csv]") {
+  csv::Reader csv;
+  csv.configure_dialect("test_dialect")
+    .delimiter(", ")
+    .ignore_columns("age", "gender");
+
+  if (csv.read("inputs/test_14.csv")) {
+    auto rows = csv.rows();
+    REQUIRE(rows.size() == 3);
+    REQUIRE(rows[0]["name"] == "Mark Johnson");
+    REQUIRE(rows[0]["email"] == "mark.johnson@gmail.com");
+    REQUIRE(rows[0]["department"] == "BA");
+    REQUIRE(rows[0].count("age") == 0);
+    REQUIRE(rows[0].count("gender") == 0);
+    REQUIRE(rows[1]["name"] == "John Stevenson");
+    REQUIRE(rows[1]["email"] == "john.stevenson@gmail.com");
+    REQUIRE(rows[1]["department"] == "IT");
+    REQUIRE(rows[1].count("age") == 0);
+    REQUIRE(rows[1].count("gender") == 0);
+    REQUIRE(rows[2]["name"] == "Jane Barkley");
+    REQUIRE(rows[2]["email"] == "jane.barkley@gmail.com");
+    REQUIRE(rows[2]["department"] == "MGT");
+    REQUIRE(rows[2].count("age") == 0);
+    REQUIRE(rows[2].count("gender") == 0);
+  }
+}
