@@ -42,6 +42,7 @@ namespace csv {
 
 struct dialect {
   std::string delimiter_;
+  bool skip_initial_space_;
   std::string line_terminator_;
   char quote_character_;
   bool double_quote_;
@@ -49,6 +50,7 @@ struct dialect {
 
   dialect() :
     delimiter_(","),
+    skip_initial_space_(true),
 #ifdef _WIN32
     line_terminator_("\n"),
 #else
@@ -60,6 +62,11 @@ struct dialect {
 
   dialect& delimiter(const std::string& delimiter) {
     delimiter_ = delimiter;
+    return *this;
+  }
+
+  dialect& skip_initial_space(bool skip_initial_space) {
+    skip_initial_space_ = skip_initial_space;
     return *this;
   }
 
@@ -162,6 +169,9 @@ private:
               values_.enqueue(trim(current));
               current = "";
               stream >> std::noskipws >> ch;
+              if (ch == ' ' && dialect_.skip_initial_space_) {
+                stream >> std::noskipws >> ch;
+              }
               quotes_encountered = 0;
             }
             else {
