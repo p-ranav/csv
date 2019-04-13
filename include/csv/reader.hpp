@@ -88,14 +88,17 @@ struct dialect {
   }
 
   // Base case for trim_characters parameter packing
-  void trim_characters() {}
+  dialect& trim_characters() {
+    return *this;
+  }
 
   // Parameter packed trim_characters method
   // Accepts a variadic number of characters
   template<typename T, typename... Targs>
-  void trim_characters(T character, Targs... Fargs) {
+  dialect& trim_characters(T character, Targs... Fargs) {
     trim_characters_.push_back(character);
     trim_characters(Fargs...);
+    return *this;
   }
 
   dialect& header(bool header) {
@@ -219,8 +222,10 @@ private:
           current[current.size() - 2] == ch)
         quotes_encountered -= 1;
     }
-    if (current != "")
+    if (current != "") {
+      if (first_row) columns_ += 1;
       values_.enqueue(trim(current));
+    }
   }
 
   void process_values(std::future<bool> * future_object) {
@@ -231,6 +236,7 @@ private:
       if (front(value)) {
         if (!dialect_.header_ && index < columns_) {
           headers_.push_back(std::to_string(headers_.size()));
+          auto column_name = headers_[index % headers_.size()];
           row[headers_[index % headers_.size()]] = value;
           index += 1;
         }
@@ -246,6 +252,7 @@ private:
             index += 1;
           }
           else {
+            auto column_name = headers_[index % headers_.size()];
             row[headers_[index % headers_.size()]] = value;
             index += 1;
             if (dialect_.header_ && row.size() > 0 && headers_.size() > 0 && index % headers_.size() == 0) {
@@ -289,6 +296,8 @@ private:
 
   // trim white spaces from either end of an input string
   std::string trim(std::string input) {
+    if (dialect_.trim_characters_.size() == 0)
+      return input;
     return ltrim(rtrim(input));
   }
 
