@@ -19,6 +19,8 @@ int main() {
   csv::Reader csv;
   if (csv.parse("test.csv")) {
     for (auto& row : csv.rows()) {
+      auto foo = row["foo"];
+      auto bar = row["bar"];
       // do something
     }
   }
