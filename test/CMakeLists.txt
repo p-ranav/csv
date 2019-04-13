@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.6)
 project(CSV)
+find_package(Threads)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -22,6 +23,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/inputs
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_EXECUTABLE(CSV ${CSV_TEST_SOURCES})
+target_link_libraries(CSV ${CMAKE_THREAD_LIBS_INIT})
 INCLUDE_DIRECTORIES("../include" ".")
 set_target_properties(CSV PROPERTIES OUTPUT_NAME tests)
 set_property(TARGET CSV PROPERTY CXX_STANDARD 17)

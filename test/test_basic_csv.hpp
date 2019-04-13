@@ -4,7 +4,10 @@
 
 TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
   csv::reader csv;
-  csv.configure();
+
+#ifdef _WIN32
+  csv.line_terminator("\n");
+#endif
 
   if (csv.parse("inputs/test_01.csv")) {
     auto rows = csv.rows();
@@ -22,6 +25,10 @@ TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter", "[simple cs
   csv::reader csv;
   csv.configure()
     .delimiter(", ");
+
+#ifdef _WIN32
+  csv.line_terminator("\n");
+#endif
 
   if (csv.parse("inputs/test_02.csv")) {
     auto rows = csv.rows();

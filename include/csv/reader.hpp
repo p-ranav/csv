@@ -45,7 +45,7 @@ public:
   reader() :
     filename_(""),
     delimiter_(","),
-    line_terminator_("\n"),
+    line_terminator_("\r\n"),
     quotechar_('"'),
     trim_characters_({}),
     columns_(0),
