@@ -24,7 +24,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
-#include <queue.hpp>
+#include <csv/queue.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -45,7 +45,7 @@ public:
   reader() :
     filename_(""),
     delimiter_(","),
-    newline_("\r\n"),
+    line_terminator_("\n"),
     quotechar_('"'),
     trim_characters_({}),
     columns_(0),
@@ -59,14 +59,14 @@ public:
     filename_ = filename;
     done_future_ = done_promise_.get_future();
     thread_ = std::thread(&reader::process_values, this, &done_future_);
-    read_file();
+    parse_internal();
     done();
     std::unique_lock<std::mutex> lock(ready_mutex_);
     while (!ready_) ready_cv_.wait(lock);
     return true;
   }
 
-  reader& configure_dialect() {
+  reader& configure() {
     return *this;
   }
 
@@ -75,8 +75,8 @@ public:
     return *this;
   }
 
-  reader& newline(const std::string& newline) {
-    newline_ = newline;
+  reader& line_terminator(const std::string& line_terminator) {
+    line_terminator_ = line_terminator;
     return *this;
   }
 
@@ -117,7 +117,7 @@ private:
     done_promise_.set_value(true);
   }
 
-  void read_file() {
+  void parse_internal() {
     std::fstream stream(filename_, std::fstream::in);
     char ch;
     std::string current;
@@ -156,10 +156,10 @@ private:
         }
       }
 
-      // Handle newline
-      for (size_t i = 0; i < newline_.size(); i++) {
-        if (ch == newline_[i]) {
-          if (i + 1 == newline_.size()) {
+      // Handle line_terminator
+      for (size_t i = 0; i < line_terminator_.size(); i++) {
+        if (ch == line_terminator_[i]) {
+          if (i + 1 == line_terminator_.size()) {
             if (first_row) columns_ += 1;
             values_.enqueue(trim(current));
             current = "";
@@ -242,7 +242,7 @@ private:
 
   std::string filename_;
   std::string delimiter_;
-  std::string newline_;
+  std::string line_terminator_;
   char quotechar_;
   std::vector<char> trim_characters_;
   size_t columns_;
