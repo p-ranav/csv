@@ -45,7 +45,11 @@ public:
   reader() :
     filename_(""),
     delimiter_(","),
+#ifdef _WIN32
+    line_terminator_("\n"),
+#else
     line_terminator_("\r\n"),
+#endif
     quotechar_('"'),
     trim_characters_({}),
     columns_(0),
