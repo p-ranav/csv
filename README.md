@@ -1,6 +1,4 @@
-# csv
-CSV for Modern C++
-
+# CSV Parser for Modern C++
 
 ```cpp
 csv::reader("test.csv");
