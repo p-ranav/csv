@@ -6,6 +6,8 @@
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
+## Quick Start
+
 ```cpp
 csv::reader("test.csv");
 
