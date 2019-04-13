@@ -47,6 +47,7 @@ struct dialect {
   char quote_character_;
   bool double_quote_;
   std::vector<char> trim_characters_;
+  bool header_;
 
   dialect() :
     delimiter_(","),
@@ -58,7 +59,8 @@ struct dialect {
 #endif
     quote_character_('"'),
     double_quote_(true),
-    trim_characters_({}) {}
+    trim_characters_({}),
+    header_(true) {}
 
   dialect& delimiter(const std::string& delimiter) {
     delimiter_ = delimiter;
@@ -94,6 +96,11 @@ struct dialect {
   void trim_characters(T character, Targs... Fargs) {
     trim_characters_.push_back(character);
     trim_characters(Fargs...);
+  }
+
+  dialect& header(bool header) {
+    header_ = header;
+    return *this;
   }
 
 };
@@ -225,21 +232,34 @@ private:
   }
 
   void process_values(std::future<bool> * future_object) {
-    size_t header_index = 0;
+    size_t index = 0;
     std::map<std::string, std::string> row;
     while(true) {
       std::string value;
       if (front(value)) {
-        if (header_index < columns_) {
-          headers_.push_back(value);
-          header_index += 1;
+        if (!dialect_.header_ && index < columns_) {
+          headers_.push_back(std::to_string(headers_.size()));
+          row[headers_[index % headers_.size()]] = value;
+          index += 1;
         }
         else {
-          row[headers_[header_index % headers_.size()]] = value;
-          header_index += 1;
-          if (header_index % headers_.size() == 0) {
+          if (!dialect_.header_ && index == columns_) {
             rows_.push_back(row);
             row.clear();
+            dialect_.header_ = true;
+          }
+
+          if (index < columns_) {
+            headers_.push_back(value);
+            index += 1;
+          }
+          else {
+            row[headers_[index % headers_.size()]] = value;
+            index += 1;
+            if (dialect_.header_ && row.size() > 0 && headers_.size() > 0 && index % headers_.size() == 0) {
+              rows_.push_back(row);
+              row.clear(); 
+            }
           }
         }
       }

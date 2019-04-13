@@ -123,3 +123,24 @@ TEST_CASE("Parse the most basic of CSV buffers - Log messages", "[simple csv]") 
     REQUIRE(rows[2]["Message"] == "File not found");
   }
 }
+
+TEST_CASE("Parse the most basic of CSV buffers - No header row", "[simple csv]") {
+  csv::reader csv;
+
+  csv.configure_dialect()
+    .header(false);
+
+  if (csv.parse("inputs/test_08.csv")) {
+    auto rows = csv.rows();
+    REQUIRE(rows.size() == 3);
+    REQUIRE(rows[0]["0"] == "1");
+    REQUIRE(rows[0]["1"] == "2");
+    REQUIRE(rows[0]["2"] == "3");
+    REQUIRE(rows[1]["0"] == "4");
+    REQUIRE(rows[1]["1"] == "5");
+    REQUIRE(rows[1]["2"] == "6");
+    REQUIRE(rows[2]["0"] == "7");
+    REQUIRE(rows[2]["1"] == "8");
+    REQUIRE(rows[2]["2"] == "9");
+  }
+}
