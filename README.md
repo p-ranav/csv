@@ -20,7 +20,6 @@ int main() {
   if (csv.read("test.csv")) {         // reads a CSV file and builds a list of dictionaries
     for (auto& row : csv.rows()) {    // test.csv => [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
       auto foo = row["foo"];
-      auto bar = row["bar"];
       // do something
     }
   }
@@ -37,13 +36,12 @@ This csv library comes with three standard dialects:
 | excel_tab | The excel_tab dialect defines the usual properties of an Excel-generated TAB-delimited file |
 | unix | The unix dialect defines the usual properties of a CSV file generated on UNIX systems, i.e. using  '\n' as line terminator and quoting all fields |
 
-Custom dialects can be constructed with ```.configure_dialect(...)``` method provided by both ```csv::Reader``` and ```csv::Writer```. Below, you can see some examples of custom dialects. If no dialect is provided, the ```excel``` dialect is used. 
-
 ### Configuring custom dialects
 
-The CSV dialect has numerous properties that can be configured using ```.configure_dialect```
+Custom dialects can be constructed with ```.configure_dialect(...)```
 
 ```cpp
+csv::Reader csv;
 csv.configure_dialect("my fancy dialect")
   .delimiter("")
   .line_terminator("")
@@ -53,6 +51,10 @@ csv.configure_dialect("my fancy dialect")
   .trim_characters(' ', '\t')    // parameter packed
   .ignore_columns("foo", "bar")  // parameter packed
   .header(true)
+
+if (csv.read("foo.csv") {
+  // do something
+}
 ```
 
 | Property | Data Type | Description |
@@ -97,27 +99,29 @@ if (csv.read("test.csv")) {
 
 ## Ignoring Columns
 
-Consider in the following CSV, you don't care about the columns ```meh``` and ```fez```.
+Consider in the following CSV, you don't care about the columns ```age``` and ```gender```.
 
 ```csv
-foo, bar, meh, baz, fez
-1, 2, 3, 4, 5
-a, b, c, d, e
+name, age, gender, email, department
+Mark Johnson, 50, M, mark.johnson@gmail.com, BA
+John Stevenson, 35, M, john.stevenson@gmail.com, IT
+Jane Barkley, 25, F, jane.barkley@gmail.com, MGT
 ```
 
-You can configure the dialect to ignore this column like so:
+You can configure the dialect to ignore these columns like so:
 
 ```cpp
 csv::reader csv;
 csv.configure_dialect("ignore meh and fez")
   .delimiter(", ")
-  .ignore_columns("meh", "fez");
+  .ignore_columns("age", "gender");
 
 if (csv.read("test.csv")) {
   auto rows = csv.rows();
   // Your rows are:
-  // [{"foo": "1", "bar": "2", "baz": "4"},
-  //  {"foo": "a", "bar": "b", "baz": "d")]
+  // [{"name": "Mark Johnson", "email": "mark.johnson@gmail.com", "department": "BA"},
+  //  {"name": "John Stevenson", "email": "john.stevenson@gmail.com", "department": "IT"},
+  //  {"name": "Jane Barkley", "email": "jane.barkley@gmail.com", "department": "MGT"}]
 }  
 ```
 
