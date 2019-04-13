@@ -54,7 +54,7 @@ csv.configure_dialect("my fancy dialect")
 
 | Property | Data Type | Description |
 |--------------------|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| delimiter | ```std::string``` | specifies the character sequence which should separate fields (aka columns). Default = "," |
+| delimiter | ```std::string``` | specifies the character sequence which should separate fields (aka columns). Default = ```","``` |
 | line_terminator | ```std::string``` | specifies the character sequence which should terminate rows. Default = ```"\r\n"``` |
 | quote_character | ```char``` | specifies a one-character string to use as the quoting character. Default = ```'"'``` |
 | double_quote | ```bool``` | controls the handling of quotes inside fields. If true, two consecutive quotes should be interpreted as one. Default = ```true``` |
