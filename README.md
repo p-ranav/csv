@@ -11,7 +11,7 @@
 ```cpp
 csv::reader("test.csv");
 
-reader.configure()
+reader.configure_dialect()
   .delimiter(", ")
   .line_terminator("\r\n")
   .trim_characters(' ', '\t')
