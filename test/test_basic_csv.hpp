@@ -19,7 +19,7 @@ TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
 
 TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter", "[simple csv]") {
   csv::reader csv;
-  csv.configure()
+  csv.configure_dialect()
     .delimiter(", ");
 
   if (csv.parse("inputs/test_02.csv")) {
@@ -36,7 +36,7 @@ TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter", "[simple cs
 
 TEST_CASE("Parse the most basic of CSV buffers with '::' delimiter", "[simple csv]") {
   csv::reader csv;
-  csv.configure()
+  csv.configure_dialect()
     .delimiter("::");
 
   if (csv.parse("inputs/test_03.csv")) {
@@ -54,7 +54,7 @@ TEST_CASE("Parse the most basic of CSV buffers with '::' delimiter", "[simple cs
 TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters", "[simple csv]") {
   csv::reader csv;
 
-  csv.configure()
+  csv.configure_dialect()
     .trim_characters(' ', '\t');
 
   if (csv.parse("inputs/test_02.csv")) {
@@ -72,7 +72,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters", "[
 TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters gone crazy", "[simple csv]") {
   csv::reader csv;
 
-  csv.configure()
+  csv.configure_dialect()
     .trim_characters(' ', '\t');
 
   if (csv.parse("inputs/test_04.csv")) {
@@ -89,7 +89,8 @@ TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters gone
 
 TEST_CASE("Parse the most basic of CSV buffers - Log messages", "[simple csv]") {
   csv::reader csv;
-  csv.delimiter("::");
+  csv.configure_dialect()
+    .delimiter("::");
   if (csv.parse("inputs/test_05.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 3);

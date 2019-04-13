@@ -40,10 +40,14 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace csv {
 
-class reader {
-public:
-  reader() :
-    filename_(""),
+struct dialect {
+  std::string delimiter_;
+  std::string line_terminator_;
+  char quote_character_;
+  bool double_quote_;
+  std::vector<char> trim_characters_;
+
+  dialect() :
     delimiter_(","),
 #ifdef _WIN32
     line_terminator_("\n"),
@@ -52,7 +56,45 @@ public:
 #endif
     quote_character_('"'),
     double_quote_(true),
-    trim_characters_({}),
+    trim_characters_({}) {}
+
+  dialect& delimiter(const std::string& delimiter) {
+    delimiter_ = delimiter;
+    return *this;
+  }
+
+  dialect& line_terminator(const std::string& line_terminator) {
+    line_terminator_ = line_terminator;
+    return *this;
+  }
+
+  dialect& quote_character(char quote_character) {
+    quote_character_ = quote_character;
+    return *this;
+  }
+
+  dialect& double_quote(bool double_quote) {
+    double_quote_ = double_quote;
+    return *this;
+  }
+
+  // Base case for trim_characters parameter packing
+  void trim_characters() {}
+
+  // Parameter packed trim_characters method
+  // Accepts a variadic number of characters
+  template<typename T, typename... Targs>
+  void trim_characters(T character, Targs... Fargs) {
+    trim_characters_.push_back(character);
+    trim_characters(Fargs...);
+  }
+
+};
+
+class reader {
+public:
+  reader() :
+    filename_(""),
     columns_(0),
     ready_(false) {}
 
@@ -71,39 +113,8 @@ public:
     return true;
   }
 
-  reader& configure() {
-    return *this;
-  }
-
-  reader& delimiter(const std::string& delimiter) {
-    delimiter_ = delimiter;
-    return *this;
-  }
-
-  reader& line_terminator(const std::string& line_terminator) {
-    line_terminator_ = line_terminator;
-    return *this;
-  }
-
-  reader& quote_character(char quote_character) {
-    quote_character_ = quote_character;
-    return *this;
-  }
-
-  reader& double_quote(bool double_quote) {
-    double_quote_ = double_quote;
-    return *this;
-  }
-
-  // Base case for trim_characters parameter packing
-  void trim_characters() {}
-
-  // Parameter packed trim_characters method
-  // Accepts a variadic number of characters
-  template<typename T, typename... Targs>
-  void trim_characters(T character, Targs... Fargs) {
-    trim_characters_.push_back(character);
-    trim_characters(Fargs...);
+  dialect& configure_dialect() {
+    return dialect_;
   }
 
   std::vector<std::map<std::string, std::string>> rows() {
@@ -140,9 +151,9 @@ private:
     while (stream >> std::noskipws >> ch) {
 
       // Handle delimiter
-      for (size_t i = 0; i < delimiter_.size(); i++) {
-        if (ch == delimiter_[i]) {
-          if (i + 1 == delimiter_.size()) {
+      for (size_t i = 0; i < dialect_.delimiter_.size(); i++) {
+        if (ch == dialect_.delimiter_[i]) {
+          if (i + 1 == dialect_.delimiter_.size()) {
             // Make sure that an even number of quotes have been 
             // encountered so far
             // If not, then don't consider the delimiter
@@ -171,9 +182,9 @@ private:
       }
 
       // Handle line_terminator
-      for (size_t i = 0; i < line_terminator_.size(); i++) {
-        if (ch == line_terminator_[i]) {
-          if (i + 1 == line_terminator_.size()) {
+      for (size_t i = 0; i < dialect_.line_terminator_.size(); i++) {
+        if (ch == dialect_.line_terminator_[i]) {
+          if (i + 1 == dialect_.line_terminator_.size()) {
             if (first_row) columns_ += 1;
             values_.enqueue(trim(current));
             current = "";
@@ -191,10 +202,10 @@ private:
 
       // Base case
       current += ch;
-      if (ch == quote_character_)
+      if (ch == dialect_.quote_character_)
         quotes_encountered += 1;
-      if (ch == quote_character_ && 
-          double_quote_ && 
+      if (ch == dialect_.quote_character_ &&
+          dialect_.double_quote_ &&
           current.size() >= 2 && 
           current[current.size() - 2] == ch)
         quotes_encountered -= 1;
@@ -238,8 +249,8 @@ private:
   std::string ltrim(std::string input) {
     std::string result = input;
     result.erase(result.begin(), std::find_if(result.begin(), result.end(), [=](int ch) {
-      return !(std::find(trim_characters_.begin(), trim_characters_.end(), ch) 
-        != trim_characters_.end());
+      return !(std::find(dialect_.trim_characters_.begin(), dialect_.trim_characters_.end(), ch)
+        != dialect_.trim_characters_.end());
     }));
     return result;
   }
@@ -248,8 +259,8 @@ private:
   std::string rtrim(std::string input) {
     std::string result = input;
     result.erase(std::find_if(result.rbegin(), result.rend(), [=](int ch) {
-      return !(std::find(trim_characters_.begin(), trim_characters_.end(), ch) 
-        != trim_characters_.end());
+      return !(std::find(dialect_.trim_characters_.begin(), dialect_.trim_characters_.end(), ch)
+        != dialect_.trim_characters_.end());
     }).base(), result.end());
     return result;
   }
@@ -260,11 +271,7 @@ private:
   }
 
   std::string filename_;
-  std::string delimiter_;
-  std::string line_terminator_;
-  char quote_character_;
-  bool double_quote_;
-  std::vector<char> trim_characters_;
+  dialect dialect_;
   size_t columns_;
   std::vector<std::string> headers_;
   std::vector<std::map<std::string, std::string>> rows_;

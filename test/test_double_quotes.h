@@ -19,7 +19,7 @@ TEST_CASE("Parse headers with double quotes", "[simple csv]") {
 TEST_CASE("Parse headers with pairs of single-quotes", "[simple csv]") {
   csv::reader csv;
 
-  csv.configure()
+  csv.configure_dialect()
     .quote_character('\'');
 
   if (csv.parse("inputs/test_07.csv")) {
