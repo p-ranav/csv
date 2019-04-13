@@ -35,4 +35,4 @@ if (reader.parse()) {
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
 ## License
-The project is available under the [BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause) license.
+This project is available under the [BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause) license.
