@@ -139,14 +139,6 @@ public:
     return headers_;
   }
 
-  template <typename T>
-  T get(size_t row, const std::string& key) {
-    std::stringstream stream(rows_[row][key]);
-    T result = T();
-    stream >> result;
-    return result;
-  }
-
 private:
   bool front(std::string& value) {
     return values_.try_dequeue(value);
