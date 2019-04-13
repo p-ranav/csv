@@ -52,7 +52,7 @@ struct Dialect {
 
   Dialect() :
     delimiter_(","),
-    skip_initial_space_(true),
+    skip_initial_space_(false),
 #ifdef _WIN32
     line_terminator_("\n"),
 #else
@@ -135,7 +135,6 @@ public:
     std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
     unix_dialect
       ->delimiter(",")
-      .skip_initial_space(true)
       .line_terminator("\n")
       .quote_character('"')
       .double_quote(true)
@@ -145,7 +144,6 @@ public:
     std::shared_ptr<Dialect> excel_dialect = std::make_shared<Dialect>();
     excel_dialect
       ->delimiter(",")
-      .skip_initial_space(false)
 #ifdef _WIN32
       .line_terminator("\n")
 #else
@@ -159,7 +157,6 @@ public:
     std::shared_ptr<Dialect> excel_tab_dialect = std::make_shared<Dialect>();
     excel_tab_dialect
       ->delimiter("\t")
-      .skip_initial_space(false)
 #ifdef _WIN32
       .line_terminator("\n")
 #else
