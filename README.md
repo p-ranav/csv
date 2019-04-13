@@ -44,7 +44,7 @@ To parse such a file, simply:
 csv::reader csv("test.csv");
 
 csv.configure_dialect("my strange dialect")
-  .delimiter(" :: ")
+  .delimiter("::")
   .trim_characters(' ', '[', ']', '{', '}');
 
 if (reader.parse()) {
