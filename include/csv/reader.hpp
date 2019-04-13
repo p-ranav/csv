@@ -83,7 +83,7 @@ public:
       .quote_character('"')
       .double_quote(true)
       .header(true);
-    dialects_["excel-tab"] = excel_tab_dialect;
+    dialects_["excel_tab"] = excel_tab_dialect;
   }
 
   ~Reader() {
