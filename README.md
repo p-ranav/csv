@@ -81,13 +81,12 @@ To parse this file, simply:
 
 ```cpp
 csv::reader csv;
-
 csv.configure_dialect("my strange dialect")
   .delimiter("::")
   .trim_characters(' ', '[', ']', '{', '}');   
 
-if (reader.parse("test.csv")) {
-  for (auto& row : reader.rows()) {
+if (csv.parse("test.csv")) {
+  for (auto& row : csv.rows()) {
     auto thread_id = row["Thread ID"];
     auto log_level = row["Log Level"];
     auto message = row["Log Message"];
@@ -95,6 +94,33 @@ if (reader.parse("test.csv")) {
   }
 }
 ```
+
+## Ignoring Columns
+
+Consider in the following CSV, you don't care about the column ```meh```.
+
+```csv
+foo, bar, meh, baz, fez
+1, 2, 3, 4, 5
+a, b, c, d, e
+```
+
+You can configure the dialect to ignore this column like so:
+
+```cpp
+csv::reader csv;
+csv.configure_dialect("ignore meh")
+  .delimiter(", ")
+  .ignore_columns("meh");
+
+if (csv.parse("test.csv")) {
+  auto rows = csv.rows();
+  // Your rows are:
+  // [{"foo": "1", "bar": "2", "baz": "4"},
+  //  {"foo": "a", "bar": "b", "baz": "d")]
+}  
+```
+
 
 ## Writing CSV files
 
