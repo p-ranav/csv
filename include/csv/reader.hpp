@@ -175,8 +175,10 @@ private:
     while (stream >> std::noskipws >> ch) {
 
       // Handle delimiter
+      std::string delimiter_substring = "";
       for (size_t i = 0; i < dialect_.delimiter_.size(); i++) {
         if (ch == dialect_.delimiter_[i]) {
+          delimiter_substring += ch;
           if (i + 1 == dialect_.delimiter_.size()) {
             // Make sure that an even number of quotes have been 
             // encountered so far
@@ -204,6 +206,7 @@ private:
           }
         } 
         else { 
+          current += delimiter_substring;
           break;
         }
       }
