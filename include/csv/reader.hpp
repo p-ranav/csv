@@ -110,6 +110,10 @@ public:
     return rows_;
   }
 
+  std::vector<std::string> cols() {
+    return headers_;
+  }
+
   template <typename T>
   T get(size_t row, const std::string& key) {
     std::stringstream stream(rows_[row][key]);
@@ -156,8 +160,8 @@ private:
             }
           }
           else {
-            if ((!double_quote_ && quotes_encountered % 2 == 0) ||
-              (double_quote_ && quotes_encountered % 4 == 0)) {
+            if ((!double_quote_ && quotes_encountered % 2 != 0) ||
+                (double_quote_ && quotes_encountered % 4 != 0)) {
               current += ch;
             }
             stream >> std::noskipws >> ch;

@@ -15,3 +15,21 @@ TEST_CASE("Parse headers with double quotes", "[simple csv]") {
     REQUIRE(cols[2] == "\"Special rate \"\"1.79\"\"\"");
   }
 }
+
+TEST_CASE("Parse headers with pairs of single-quotes", "[simple csv]") {
+  csv::reader csv;
+
+  csv.configure()
+    .quote_character('\'')
+    .double_quote(true);
+
+  if (csv.parse("inputs/test_07.csv")) {
+    auto rows = csv.rows();
+    REQUIRE(rows.size() == 0);
+    auto cols = csv.cols();
+    REQUIRE(cols.size() == 3);
+    REQUIRE(cols[0] == "''Free trip to A,B''");
+    REQUIRE(cols[1] == "''5.89''");
+    REQUIRE(cols[2] == "''Special rate ''''1.79''''''");
+  }
+}
