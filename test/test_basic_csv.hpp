@@ -5,7 +5,7 @@
 TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
   csv::Reader csv;
 
-  if (csv.parse("inputs/test_01.csv")) {
+  if (csv.read("inputs/test_01.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
@@ -23,7 +23,7 @@ TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter", "[simple cs
   csv.configure_dialect("test_dialect")
     .delimiter(", ");
 
-  if (csv.parse("inputs/test_02.csv")) {
+  if (csv.read("inputs/test_02.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
@@ -41,7 +41,7 @@ TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter using skip_in
     .delimiter(",")
     .skip_initial_space(true);
 
-  if (csv.parse("inputs/test_02.csv")) {
+  if (csv.read("inputs/test_02.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
@@ -58,7 +58,7 @@ TEST_CASE("Parse the most basic of CSV buffers with '::' delimiter", "[simple cs
   csv.configure_dialect("test_dialect")
     .delimiter("::");
 
-  if (csv.parse("inputs/test_03.csv")) {
+  if (csv.read("inputs/test_03.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
@@ -76,7 +76,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters", "[
   csv.configure_dialect("test_dialect")
     .trim_characters(' ', '\t');
 
-  if (csv.parse("inputs/test_02.csv")) {
+  if (csv.read("inputs/test_02.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
@@ -94,7 +94,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Trim whitespace characters gone
   csv.configure_dialect("test_dialect")
     .trim_characters(' ', '\t');
 
-  if (csv.parse("inputs/test_04.csv")) {
+  if (csv.read("inputs/test_04.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
@@ -110,7 +110,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Log messages", "[simple csv]") 
   csv::Reader csv;
   csv.configure_dialect("test_dialect")
     .delimiter("::");
-  if (csv.parse("inputs/test_05.csv")) {
+  if (csv.read("inputs/test_05.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 3);
     REQUIRE(rows[0]["Thread_ID"] == "1");
@@ -131,7 +131,7 @@ TEST_CASE("Parse the most basic of CSV buffers - No header row", "[simple csv]")
   csv.configure_dialect("test_dialect")
     .header(false);
 
-  if (csv.parse("inputs/test_08.csv")) {
+  if (csv.read("inputs/test_08.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 3);
     REQUIRE(rows[0]["0"] == "1");
@@ -152,7 +152,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Space delimiter", "[simple csv]
   csv.configure_dialect("test_dialect")
     .delimiter(" ");
 
-  if (csv.parse("inputs/test_09.csv")) {
+  if (csv.read("inputs/test_09.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["first_name"] == "Eric");
@@ -169,7 +169,7 @@ TEST_CASE("Parse the most basic of CSV buffers - Log with header", "[simple csv]
     .delimiter(" :: ")
     .trim_characters('[', ']');
 
-  if (csv.parse("inputs/test_10.csv")) {
+  if (csv.read("inputs/test_10.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["Timestamp"] == "1555164718");
@@ -187,7 +187,7 @@ TEST_CASE("Parse Excel CSV", "[simple csv]") {
   csv::Reader csv;
   csv.use_dialect("excel");
 
-  if (csv.parse("inputs/test_11_excel.csv")) {
+  if (csv.read("inputs/test_11_excel.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
@@ -203,7 +203,7 @@ TEST_CASE("Parse Unix CSV", "[simple csv]") {
   csv::Reader csv;
   csv.use_dialect("unix");
 
-  if (csv.parse("inputs/test_12_unix.csv")) {
+  if (csv.read("inputs/test_12_unix.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
@@ -222,7 +222,7 @@ TEST_CASE("Parse messed up log files", "[simple csv]") {
     .delimiter("::")
     .trim_characters(' ', '[', ']', '{', '}');
 
-  if (csv.parse("inputs/test_13.csv")) {
+  if (csv.read("inputs/test_13.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows.size() == 2);

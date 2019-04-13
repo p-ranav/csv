@@ -90,12 +90,12 @@ public:
     if (thread_started_) thread_.join();
   }
 
-  bool parse(const std::string& filename) {
+  bool read(const std::string& filename) {
     filename_ = filename;
     done_future_ = done_promise_.get_future();
     thread_ = std::thread(&Reader::process_values, this, &done_future_);
     thread_started_ = true;
-    parse_internal();
+    read_internal();
     done();
     std::unique_lock<std::mutex> lock(ready_mutex_);
     while (!ready_) ready_cv_.wait(lock);
@@ -149,7 +149,7 @@ private:
     done_promise_.set_value(true);
   }
 
-  void parse_internal() {
+  void read_internal() {
     std::fstream stream(filename_, std::fstream::in);
     stream.flags(stream.flags() & ~std::ios_base::skipws);
     if (!stream.is_open()) {

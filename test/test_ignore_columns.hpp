@@ -7,7 +7,7 @@ TEST_CASE("Parse the most basic of CSV buffers and ignore 1 column", "[simple cs
   csv.configure_dialect("test_dialect")
     .ignore_columns("a");
 
-  if (csv.parse("inputs/test_01.csv")) {
+  if (csv.read("inputs/test_01.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0].count("a") == 0);
@@ -24,7 +24,7 @@ TEST_CASE("Parse the most basic of CSV buffers and ignore 2 columns", "[simple c
   csv.configure_dialect("test_dialect")
     .ignore_columns("a", "b");
 
-  if (csv.parse("inputs/test_01.csv")) {
+  if (csv.read("inputs/test_01.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0].count("a") == 0);
@@ -41,7 +41,7 @@ TEST_CASE("Parse the most basic of CSV buffers and ignore all columns", "[simple
   csv.configure_dialect("test_dialect")
     .ignore_columns("a", "b", "c");
 
-  if (csv.parse("inputs/test_01.csv")) {
+  if (csv.read("inputs/test_01.csv")) {
     auto rows = csv.rows();
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0].size() == 0);
