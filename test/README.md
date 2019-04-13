@@ -17,7 +17,7 @@ $ ./tests
 ```bash
 $ mkdir build
 $ cd build
-$ cmake ../. -G "Visual Studio 15 2017"
+$ cmake ../. -G "Visual Studio 15 2017 Win64"
 ```
 
 2. Open CSV.sln
