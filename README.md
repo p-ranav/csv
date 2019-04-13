@@ -9,7 +9,7 @@
 ## Quick Start
 
 * [Reader CSV files](#reading-csv-files)
-* [Writing CSV files](#reading-csv-files)
+* [Writing CSV files](#writing-csv-files)
 
 ## Reading CSV files
 
