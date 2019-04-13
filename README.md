@@ -79,7 +79,7 @@ Consider this strange, messed up log file:
 02        :: DEBUG :: Warning! Foo has happened                :: 1555463132
 ```
 
-To parse this file, simply configure a new dialect:
+To parse this file, configure a new dialect that splits on "::" and trims whitespace, braces, and bracket characters.
 
 ```cpp
 csv::reader csv;
@@ -99,7 +99,7 @@ if (csv.read("test.csv")) {
 
 ## Ignoring Columns
 
-Consider in the following CSV, you don't care about the columns ```age``` and ```gender```.
+Consider the following CSV. Let's say you don't care about the columns ```age``` and ```gender```. Here, you can use ```.ignore_columns``` and provide a list of columns to ignore. 
 
 ```csv
 name, age, gender, email, department
