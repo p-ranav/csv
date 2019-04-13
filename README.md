@@ -6,9 +6,15 @@
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
-## Quick Start
+## Table of Contents
 
-### Reading CSV files
+- [Reading CSV files](#reading-csv-files)
+  * [Configuring custom dialects](#configuring-custom-dialects)
+  * [Trimming Characters](#trimming-characters)
+  * [Ignoring Columns](#ignoring-columns)
+  * [Filtering Rows](#filtering-rows)
+
+## Reading CSV files
 
 To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
 
@@ -25,8 +31,6 @@ int main() {
   }
 }
 ```
-
-## Dialects
 
 This csv library comes with three standard dialects:
 
@@ -68,8 +72,7 @@ if (csv.read("foo.csv") {
 | ignore_columns | ```std::vector<std::string>``` | specifies the list of columns to ignore. These columns will be stripped during the parsing process. Default = ```{}``` - no column ignored |
 | header | ```bool``` | indicates whether the file includes a header row. If true the first row in the file is a header row, not data. Default = ```true``` |
 
-
-## Trimming Characters
+### Trimming Characters
 
 Consider this strange, messed up log file: 
 
@@ -97,7 +100,7 @@ if (csv.read("test.csv")) {
 }
 ```
 
-## Ignoring Columns
+### Ignoring Columns
 
 Consider the following CSV. Let's say you don't care about the columns ```age``` and ```gender```. Here, you can use ```.ignore_columns``` and provide a list of columns to ignore. 
 
@@ -125,7 +128,7 @@ if (csv.read("test.csv")) {
 }  
 ```
 
-## Filtering Rows
+### Filtering Rows
 
 Once parsed, you can filter the CSV and obtain a list of rows that meet some condition using ```.filter(...)```
 
