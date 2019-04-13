@@ -214,3 +214,25 @@ TEST_CASE("Parse Unix CSV", "[simple csv]") {
     REQUIRE(rows[1]["c"] == "6");
   }
 }
+
+TEST_CASE("Parse messed up log files", "[simple csv]") {
+  csv::Reader csv;
+
+  csv.configure_dialect("my strange dialect")
+    .delimiter("::")
+    .trim_characters(' ', '[', ']', '{', '}');
+
+  if (csv.parse("inputs/test_13.csv")) {
+    auto rows = csv.rows();
+    REQUIRE(rows.size() == 2);
+    REQUIRE(rows.size() == 2);
+    REQUIRE(rows[0]["Timestamp"] == "1555164718");
+    REQUIRE(rows[0]["Thread ID"] == "04");
+    REQUIRE(rows[0]["Log Level"] == "INFO");
+    REQUIRE(rows[0]["Log Message"] == "Hello World");
+    REQUIRE(rows[1]["Timestamp"] == "1555463132");
+    REQUIRE(rows[1]["Thread ID"] == "02");
+    REQUIRE(rows[1]["Log Level"] == "DEBUG");
+    REQUIRE(rows[1]["Log Message"] == "Warning! Foo has happened");
+  }
+}
