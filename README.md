@@ -9,6 +9,7 @@
 ## Table of Contents
 
 - [Reading CSV files](#reading-csv-files)
+  * [Default dialects](#default-dialects)
   * [Configuring custom dialects](#configuring-custom-dialects)
   * [Trimming Characters](#trimming-characters)
   * [Ignoring Columns](#ignoring-columns)
@@ -31,6 +32,8 @@ int main() {
   }
 }
 ```
+
+### Default dialects
 
 This csv library comes with three standard dialects:
 
