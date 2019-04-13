@@ -1,5 +1,11 @@
 # CSV Parser for Modern C++
 
+## Highlights
+
+* Header-only library
+* Requires C++17
+* BSD 2-Clause "Simplified" License
+
 ```cpp
 csv::reader("test.csv");
 
