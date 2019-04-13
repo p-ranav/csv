@@ -3,7 +3,7 @@
 #include <csv/reader.hpp>
 
 TEST_CASE("Parse headers with double quotes", "[simple csv]") {
-  csv::reader csv;
+  csv::Reader csv;
 
   if (csv.parse("inputs/test_06.csv")) {
     auto rows = csv.rows();
@@ -17,7 +17,7 @@ TEST_CASE("Parse headers with double quotes", "[simple csv]") {
 }
 
 TEST_CASE("Parse headers with pairs of single-quotes", "[simple csv]") {
-  csv::reader csv;
+  csv::Reader csv;
 
   csv.configure_dialect()
     .quote_character('\'');

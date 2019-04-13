@@ -40,7 +40,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace csv {
 
-struct dialect {
+struct Dialect {
   std::string delimiter_;
   bool skip_initial_space_;
   std::string line_terminator_;
@@ -50,7 +50,7 @@ struct dialect {
   std::vector<char> trim_characters_;
   bool header_;
 
-  dialect() :
+  Dialect() :
     delimiter_(","),
     skip_initial_space_(true),
 #ifdef _WIN32
@@ -63,81 +63,81 @@ struct dialect {
     trim_characters_({}),
     header_(true) {}
 
-  dialect& delimiter(const std::string& delimiter) {
+  Dialect& delimiter(const std::string& delimiter) {
     delimiter_ = delimiter;
     return *this;
   }
 
-  dialect& skip_initial_space(bool skip_initial_space) {
+  Dialect& skip_initial_space(bool skip_initial_space) {
     skip_initial_space_ = skip_initial_space;
     return *this;
   }
 
-  dialect& line_terminator(const std::string& line_terminator) {
+  Dialect& line_terminator(const std::string& line_terminator) {
     line_terminator_ = line_terminator;
     return *this;
   }
 
-  dialect& quote_character(char quote_character) {
+  Dialect& quote_character(char quote_character) {
     quote_character_ = quote_character;
     return *this;
   }
 
-  dialect& double_quote(bool double_quote) {
+  Dialect& double_quote(bool double_quote) {
     double_quote_ = double_quote;
     return *this;
   }
 
   // Base case for trim_characters parameter packing
-  dialect& trim_characters() {
+  Dialect& trim_characters() {
     return *this;
   }
 
   // Parameter packed trim_characters method
   // Accepts a variadic number of characters
   template<typename T, typename... Targs>
-  dialect& trim_characters(T character, Targs... Fargs) {
+  Dialect& trim_characters(T character, Targs... Fargs) {
     trim_characters_.push_back(character);
     trim_characters(Fargs...);
     return *this;
   }
 
   // Base case for ignore_columns parameter packing
-  dialect& ignore_columns() {
+  Dialect& ignore_columns() {
     return *this;
   }
 
   // Parameter packed trim_characters method
   // Accepts a variadic number of columns
   template<typename T, typename... Targs>
-  dialect& ignore_columns(T column, Targs... Fargs) {
+  Dialect& ignore_columns(T column, Targs... Fargs) {
     ignore_columns_.push_back(column);
     ignore_columns(Fargs...);
     return *this;
   }
 
-  dialect& header(bool header) {
+  Dialect& header(bool header) {
     header_ = header;
     return *this;
   }
 
 };
 
-class reader {
+class Reader {
 public:
-  reader() :
+  Reader() :
     filename_(""),
     columns_(0),
     ready_(false) {}
 
-  ~reader() {
+  ~Reader() {
     thread_.join();
   }
 
   bool parse(const std::string& filename) {
     filename_ = filename;
     done_future_ = done_promise_.get_future();
-    thread_ = std::thread(&reader::process_values, this, &done_future_);
+    thread_ = std::thread(&Reader::process_values, this, &done_future_);
     parse_internal();
     done();
     std::unique_lock<std::mutex> lock(ready_mutex_);
@@ -145,7 +145,7 @@ public:
     return true;
   }
 
-  dialect& configure_dialect() {
+  Dialect& configure_dialect() {
     return dialect_;
   }
 
@@ -326,7 +326,7 @@ private:
   }
 
   std::string filename_;
-  dialect dialect_;
+  Dialect dialect_;
   size_t columns_;
   std::vector<std::string> headers_;
   std::vector<std::map<std::string, std::string>> rows_;
