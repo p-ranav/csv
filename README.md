@@ -4,9 +4,10 @@
 
 * Header-only library
 * Requires C++17
+* Multi-threaded processing
 * BSD 2-Clause "Simplified" License
 
-## Quick Start
+## Reading CSV files
 
 ```cpp
 csv::reader("test.csv");
