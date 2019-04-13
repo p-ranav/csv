@@ -20,7 +20,6 @@ int main() {
   if (csv.read("test.csv")) {         // reads a CSV file and builds a list of dictionaries
     for (auto& row : csv.rows()) {    // test.csv => [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
       auto foo = row["foo"];
-      auto bar = row["bar"];
       // do something
     }
   }
