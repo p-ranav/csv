@@ -1,4 +1,4 @@
-# CSV Parser Tests
+# CSV Tests
 
 ## Linux
 
