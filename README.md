@@ -6,20 +6,52 @@
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
-## Reading CSV files
+## Quick Start
+
+To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
+
+```cpp
+#include <csv/reader.hpp>
+
+int main() {
+  csv::Reader csv;
+  if (csv.parse("test.csv")) {
+    for (auto& row : csv.rows()) {
+      // do something
+    }
+  }
+}
+```
+
+## Examples
+
+### Parsing log files
+
+Consider this strange, messed up log file: 
+
+```csv
+[Thread ID] :: [Log Level] :: [Log Message] :: {Timestamp}
+04 :: INFO :: Hello World ::             1555164718
+02        :: DEBUG :: Warning! Foo has happened                :: 1555463132
+```
+
+To parse such a file, simply:
+* Configure a new ```dialect```
+* Specify the delimiter
+* Provide a list of characters that need to be trimmed. 
 
 ```cpp
 csv::reader("test.csv");
 
-reader.configure_dialect()
-  .delimiter(", ")
-  .line_terminator("\r\n")
-  .trim_characters(' ', '\t')
-  .ignore_columns("foo", "bar");
+reader.configure_dialect("my strange dialect")
+  .delimiter(" :: ")
+  .trim_characters(' ', '[', ']', '{', '}');
 
 if (reader.parse()) {
   for (auto& row : reader.rows()) {
-    int baz_value = row["baz"];
+    auto thread_id = row["Thread ID"];
+    auto log_level = row["Log Level"];
+    auto message = row["Log Message"];
     // do something
   }
 }
