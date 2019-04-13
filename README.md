@@ -50,8 +50,8 @@ csv.configure_dialect("my fancy dialect")
   .quote_character('"')
   .double_quote(true)
   .skip_initial_space(false)
-  .trim_characters(' ', '\t')
-  .ignore_columns("foo", "bar")
+  .trim_characters(' ', '\t')    // parameter packed
+  .ignore_columns("foo", "bar")  // parameter packed
   .header(true)
 ```
 
