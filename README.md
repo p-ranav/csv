@@ -163,8 +163,6 @@ if (csv.read("test.csv")) {
 
 NOTE: Filtering does not mutate the original list of rows. ```csv.rows()``` will still return all the original rows. This call simply returns a copy with the filtered results. 
 
-## Writing CSV files
-
 ## Supported Compilers
 * GCC >= 7.0.0
 * Clang >= 4.0
