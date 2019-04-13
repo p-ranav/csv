@@ -76,10 +76,7 @@ Consider this strange, messed up log file:
 02        :: DEBUG :: Warning! Foo has happened                :: 1555463132
 ```
 
-To parse this file, simply:
-* Configure a new ```dialect```
-* Specify the delimiter as "::"
-* Provide a list of characters that need to be trimmed
+To parse this file, simply configure a new dialect:
 
 ```cpp
 csv::reader csv;
