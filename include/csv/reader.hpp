@@ -212,8 +212,10 @@ private:
       }
 
       // Handle line_terminator
+      std::string line_terminator_substring = "";
       for (size_t i = 0; i < dialect_.line_terminator_.size(); i++) {
         if (ch == dialect_.line_terminator_[i]) {
+          line_terminator_substring += ch;
           if (i + 1 == dialect_.line_terminator_.size()) {
             if (first_row) columns_ += 1;
             values_.enqueue(trim(current));
@@ -226,6 +228,7 @@ private:
           }
         } 
         else { 
+          current += line_terminator_substring;
           break;
         }
       }
