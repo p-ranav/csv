@@ -140,11 +140,10 @@ public:
     return headers_;
   }
 
-  std::vector<std::map<std::string, std::string>> 
-    filter(std::function<bool(std::map<std::string, std::string>)> filter_function) {
+  void filter(std::function<bool(std::map<std::string, std::string>)> filter_function) {
     std::vector<std::map<std::string, std::string>> result;
     std::copy_if(rows_.begin(), rows_.end(), std::back_inserter(result), filter_function);
-    return result;
+    rows_ = result;
   }
 
 private:
