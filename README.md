@@ -35,7 +35,7 @@ This csv library comes with three standard dialects:
 | excel_tab | The excel_tab dialect defines the usual properties of an Excel-generated TAB-delimited file |
 | unix | The unix dialect defines the usual properties of a CSV file generated on UNIX systems, i.e. using  '\n' as line terminator and quoting all fields |
 
-Custom dialects can be constructed with ```.configure_dialect(...)``` method provided by both csv::Reader and csv::Writer. Below, you can see some examples of custom dialects. If no dialect is provided, the ```excel``` dialect is the default. 
+Custom dialects can be constructed with ```.configure_dialect(...)``` method provided by both ```csv::Reader``` and ```csv::Writer```. Below, you can see some examples of custom dialects. If no dialect is provided, the ```excel``` dialect is the default. 
 
 ### Configuring custom dialects
 
