@@ -99,27 +99,29 @@ if (csv.read("test.csv")) {
 
 ## Ignoring Columns
 
-Consider in the following CSV, you don't care about the columns ```meh``` and ```fez```.
+Consider in the following CSV, you don't care about the columns ```age``` and ```gender```.
 
 ```csv
-foo, bar, meh, baz, fez
-1, 2, 3, 4, 5
-a, b, c, d, e
+name, age, gender, email, department
+Mark Johnson, 50, M, mark.johnson@gmail.com, BA
+John Stevenson, 35, M, john.stevenson@gmail.com, IT
+Jane Barkley, 25, F, jane.barkley@gmail.com, MGT
 ```
 
-You can configure the dialect to ignore this column like so:
+You can configure the dialect to ignore these columns like so:
 
 ```cpp
 csv::reader csv;
 csv.configure_dialect("ignore meh and fez")
   .delimiter(", ")
-  .ignore_columns("meh", "fez");
+  .ignore_columns("age", "gender");
 
 if (csv.read("test.csv")) {
   auto rows = csv.rows();
   // Your rows are:
-  // [{"foo": "1", "bar": "2", "baz": "4"},
-  //  {"foo": "a", "bar": "b", "baz": "d")]
+  // [{"name": "Mark Johnson", "email": "mark.johnson@gmail.com", "department": "BA"},
+  //  {"name": "John Stevenson", "email": "john.stevenson@gmail.com", "department": "IT"},
+  //  {"name": "Jane Barkley", "email": "jane.barkley@gmail.com", "department": "MGT"}]
 }  
 ```
 
