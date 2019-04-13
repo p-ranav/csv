@@ -8,7 +8,8 @@
 
 ## Quick Start
 
-* [CSV Reader](#reading-csv-files)
+* [Reader CSV files](#reading-csv-files)
+* [Writing CSV files](#reading-csv-files)
 
 ## Reading CSV files
 
@@ -58,6 +59,8 @@ if (reader.parse()) {
   }
 }
 ```
+
+## Writing CSV files
 
 ## Supported Compilers
 * GCC >= 7.0.0
