@@ -187,15 +187,15 @@ public:
     return true;
   }
 
-  Dialect& configure_dialect(const std::string& dialect_name = "excel") {
-    if (dialect_name != "excel") {
+  Dialect& configure_dialect(const std::string& dialect_name) {
+    if (dialects_.find(dialect_name) != dialects_.end()) {
+      return *dialects_[dialect_name];
+    }
+    else {
       std::shared_ptr<Dialect> dialect_object = std::make_shared<Dialect>();
       dialects_[dialect_name] = dialect_object;
       current_dialect_ = dialect_name;
       return *dialect_object;
-    }
-    else {
-      return *dialects_["excel"];
     }
   }
 
