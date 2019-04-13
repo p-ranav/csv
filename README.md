@@ -2,14 +2,9 @@
 
 ## Highlights
 
-* Header-only library
+* Header-only library to [read](#reading-csv-files) and [write](#writing-csv-files) CSV files
 * Requires C++17
 * BSD 2-Clause "Simplified" License
-
-## Quick Start
-
-* [Reader CSV files](#reading-csv-files)
-* [Writing CSV files](#writing-csv-files)
 
 ## Reading CSV files
 
