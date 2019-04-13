@@ -41,9 +41,9 @@ To parse such a file, simply:
 * Provide a list of characters that need to be trimmed. 
 
 ```cpp
-csv::reader("test.csv");
+csv::reader csv("test.csv");
 
-reader.configure_dialect("my strange dialect")
+csv.configure_dialect("my strange dialect")
   .delimiter(" :: ")
   .trim_characters(' ', '[', ']', '{', '}');
 
