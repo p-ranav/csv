@@ -23,9 +23,7 @@ int main() {
 }
 ```
 
-## Examples
-
-### Parsing log files
+## Trimming Characters
 
 Consider this strange, messed up log file: 
 
