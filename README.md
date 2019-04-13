@@ -33,19 +33,19 @@ Consider this strange, messed up log file:
 02        :: DEBUG :: Warning! Foo has happened                :: 1555463132
 ```
 
-To parse such a file, simply:
+To parse this file, simply:
 * Configure a new ```dialect```
-* Specify the delimiter
-* Provide a list of characters that need to be trimmed. 
+* Specify the delimiter as "::"
+* Provide a list of characters that need to be trimmed
 
 ```cpp
-csv::reader csv("test.csv");
+csv::reader csv;
 
 csv.configure_dialect("my strange dialect")
   .delimiter("::")
   .trim_characters(' ', '[', ']', '{', '}');   
 
-if (reader.parse()) {
+if (reader.parse("test.csv")) {
   for (auto& row : reader.rows()) {
     auto thread_id = row["Thread ID"];
     auto log_level = row["Log Level"];
