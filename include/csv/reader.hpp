@@ -196,6 +196,17 @@ public:
     }
   }
 
+  std::vector<std::string> list_dialects() {
+    std::vector<std::string> result;
+    for (auto& [key, value] : dialects_)
+      result.push_back(key);
+    return result;
+  }
+
+  Dialect& get_dialect(const std::string& dialect_name) {
+    return *(dialects_[dialect_name]);
+  }
+
   void use_dialect(const std::string& dialect_name) {
     current_dialect_ = dialect_name;
     if (dialects_.find(dialect_name) == dialects_.end()) {
