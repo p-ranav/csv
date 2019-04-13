@@ -136,7 +136,7 @@ if (csv.read("test.csv")) {
 Once parsed, you can filter the CSV and obtain a list of rows that meet some condition using ```.filter(...)```
 
 ```csv
-first_name, second_name, grade
+first_name, last_name, grade
 Alex, Brian, A
 Tom, Smith, F
 John, Doe, B
