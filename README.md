@@ -25,7 +25,7 @@ int main() {
 
 ## Default Dialects
 
-This csv library comes with three stanard dialects. The 'excel' dialect is the default if no dialect is provided. 
+This csv library comes with three stanard dialects:
 
 | Name | Description |
 |-----------|---------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -33,7 +33,7 @@ This csv library comes with three stanard dialects. The 'excel' dialect is the d
 | excel_tab | The excel_tab dialect defines the usual properties of an Excel-generated TAB-delimited file |
 | unix | The unix dialect defines the usual properties of a CSV file generated on UNIX systems, i.e. using  '\n' as line terminator and quoting all fields |
 
-Custom dialects can be constructed with ```.configure_dialect(...)``` method provided by both csv::Reader and csv::Writer. Below, you can see some examples of custom dialects. 
+Custom dialects can be constructed with ```.configure_dialect(...)``` method provided by both csv::Reader and csv::Writer. Below, you can see some examples of custom dialects. If no dialect is provided, the ```excel``` dialect is the default. 
 
 ### Trimming Characters
 
