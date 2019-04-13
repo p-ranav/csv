@@ -4,7 +4,6 @@
 
 * Header-only library
 * Requires C++17
-* Multi-threaded processing
 * BSD 2-Clause "Simplified" License
 
 ## Reading CSV files
