@@ -60,6 +60,8 @@ csv.configure_dialect("my fancy dialect")
 | header | bool | indicates whether the file includes a header row. If true the first row in the file is a header row, not data. Default = ```true``` |
 | trim_characters | std::vector<char> | specifies the list of characters to trim from every value in the CSV. Default = ```{}``` - nothing trimmed |
 
+## Examples
+
 ### Trimming Characters
 
 Consider this strange, messed up log file: 
