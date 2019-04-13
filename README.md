@@ -96,7 +96,7 @@ if (csv.parse("test.csv")) {
 
 ## Ignoring Columns
 
-Consider in the following CSV, you don't care about the column ```meh```.
+Consider in the following CSV, you don't care about the columns ```meh``` and ```fez```.
 
 ```csv
 foo, bar, meh, baz, fez
@@ -108,9 +108,9 @@ You can configure the dialect to ignore this column like so:
 
 ```cpp
 csv::reader csv;
-csv.configure_dialect("ignore meh")
+csv.configure_dialect("ignore meh and fez")
   .delimiter(", ")
-  .ignore_columns("meh");
+  .ignore_columns("meh", "fez");
 
 if (csv.parse("test.csv")) {
   auto rows = csv.rows();
