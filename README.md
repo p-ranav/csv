@@ -2,7 +2,7 @@
 
 ## Highlights
 
-* Header-only library to parse CSV files
+* Header-only library
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
