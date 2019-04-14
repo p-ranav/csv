@@ -53,7 +53,6 @@ namespace csv {
       std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
       unix_dialect
         ->delimiter(",")
-        .line_terminator("\n")
         .quote_character('"')
         .double_quote(true)
         .header(true);
@@ -62,11 +61,6 @@ namespace csv {
       std::shared_ptr<Dialect> excel_dialect = std::make_shared<Dialect>();
       excel_dialect
         ->delimiter(",")
-#ifdef _WIN32
-        .line_terminator("\n")
-#else
-        .line_terminator("\r\n")
-#endif
         .quote_character('"')
         .double_quote(true)
         .header(true);
@@ -75,11 +69,6 @@ namespace csv {
       std::shared_ptr<Dialect> excel_tab_dialect = std::make_shared<Dialect>();
       excel_tab_dialect
         ->delimiter("\t")
-#ifdef _WIN32
-        .line_terminator("\n")
-#else
-        .line_terminator("\r\n")
-#endif
         .quote_character('"')
         .double_quote(true)
         .header(true);
@@ -179,8 +168,7 @@ namespace csv {
         first_line.pop_back();
       }
       
-      auto first_line_split = split(first_line, dialect->delimiter_, 
-        dialect->quote_character_, dialect->double_quote_, dialect);
+      auto first_line_split = split(first_line, dialect);
       if (dialect->header_) {
         headers_ = first_line_split;
       }
@@ -197,79 +185,14 @@ namespace csv {
       thread_ = std::thread(&Reader::process_values, this, &done_future_);
       thread_started_ = true;
 
-      char ch;
-      std::string current;
-      size_t quotes_encountered = 0;
-
-      while (stream >> std::noskipws >> ch) {
-        // Handle delimiter
-        std::string delimiter_substring = "";
-        for (size_t i = 0; i < dialect->delimiter_.size(); i++) {
-          if (ch == dialect->delimiter_[i]) {
-            delimiter_substring += ch;
-            if (i + 1 == dialect->delimiter_.size()) {
-              // Make sure that an even number of quotes have been 
-              // encountered so far
-              // If not, then don't consider the delimiter
-              if (quotes_encountered % 2 == 0) {
-                values_.enqueue(trim(current));
-                current = "";
-                stream >> std::noskipws >> ch;
-                if (ch == ' ' && dialect->skip_initial_space_) {
-                  stream >> std::noskipws >> ch;
-                }
-                quotes_encountered = 0;
-              }
-              else {
-                current += ch;
-                stream >> std::noskipws >> ch;
-              }
-            }
-            else {
-              if (quotes_encountered % 2 != 0) {
-                current += ch;
-              }
-              stream >> std::noskipws >> ch;
-            }
-          }
-          else {
-            current += delimiter_substring;
-            break;
-          }
-        }
-
-        // Handle line_terminator
-        std::string line_terminator_substring = "";
-        for (size_t i = 0; i < dialect->line_terminator_.size(); i++) {
-          if (ch == dialect->line_terminator_[i]) {
-            line_terminator_substring += ch;
-            if (i + 1 == dialect->line_terminator_.size()) {
-              values_.enqueue(trim(current));
-              current = "";
-              stream >> std::noskipws >> ch;
-            }
-            else {
-              stream >> std::noskipws >> ch;
-            }
-          }
-          else {
-            current += line_terminator_substring;
-            break;
-          }
-        }
-
-        // Base case
-        current += ch;
-        if (ch == dialect->quote_character_)
-          quotes_encountered += 1;
-        if (ch == dialect->quote_character_ &&
-          dialect->double_quote_ &&
-          current.size() >= 2 &&
-          current[current.size() - 2] == ch)
-          quotes_encountered -= 1;
+      std::string row;
+      while (std::getline(stream, row)) {
+        if (row.size() > 0 && row[row.size() - 1] == '\r')
+          row.pop_back();
+        auto row_split = split(row, dialect);
+        for (auto& value : row_split)
+          values_.enqueue(value);
       }
-      if (current != "")
-        values_.enqueue(trim(current));
     }
 
     void process_values(std::future<bool> * future_object) {
@@ -333,9 +256,7 @@ namespace csv {
     // split string based on a delimiter string
     // supports multi-character delimiter
     // returns a vector of substrings after split
-    std::vector<std::string>
-      split(const std::string& input_string, const std::string& delimiter,
-        char quote_character, bool double_quote, std::shared_ptr<Dialect> dialect) {
+    std::vector<std::string> split(const std::string& input_string, std::shared_ptr<Dialect> dialect) {
       
       std::shared_ptr<std::vector<std::string>> result = std::make_shared<std::vector<std::string>>();
       std::string sub_result = "";
@@ -346,16 +267,16 @@ namespace csv {
                 
         // Check if ch is the start of a delimiter sequence
         bool delimiter_detected = false;
-        for (size_t j = 0; j < delimiter.size(); ++j) {
+        for (size_t j = 0; j < dialect->delimiter_.size(); ++j) {
 
           char ch = input_string[i];
-          if (ch != delimiter[j]) {
+          if (ch != dialect->delimiter_[j]) {
             delimiter_detected = false;
             break;
           }
           else {
             // ch *might* be the start of a delimiter sequence
-            if (j + 1 == delimiter.size()) {
+            if (j + 1 == dialect->delimiter_.size()) {
               if (quotes_encountered % 2 == 0) {
                 // Reached end of delimiter sequence without breaking
                 // delimiter detected!
@@ -389,10 +310,10 @@ namespace csv {
         if (!delimiter_detected)
           sub_result += input_string[i];
 
-        if (input_string[i] == quote_character)
+        if (input_string[i] == dialect->quote_character_)
           quotes_encountered += 1;
-        if (input_string[i] == quote_character &&
-          double_quote &&
+        if (input_string[i] == dialect->quote_character_ &&
+          dialect->double_quote_ &&
           sub_result.size() >= 2 &&
           sub_result[sub_result.size() - 2] == input_string[i])
           quotes_encountered -= 1;
