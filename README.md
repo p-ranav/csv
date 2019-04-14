@@ -35,7 +35,7 @@ int main() {
 
 ### Standard Dialects
 
-This csv library comes with three standard dialects:	Dialects can be constructed with ```.configure_dialect(...)```
+This csv library comes with three standard dialects:
 
  | Name | Description |	
 |-----------|---------------------------------------------------------------------------------------------------------------------------------------------------|	
@@ -43,9 +43,9 @@ This csv library comes with three standard dialects:	Dialects can be constructed
 | excel_tab | The excel_tab dialect defines the usual properties of an Excel-generated TAB-delimited file |	
 | unix | The unix dialect defines the usual properties of a CSV file generated on UNIX systems, i.e. using  '\n' as line terminator and quoting all fields |	
 
-### Configuring Dialects
+### Configuring Custom Dialects
 
-Dialects can be constructed with ```.configure_dialect(...)```
+Custom dialects can be constructed with ```.configure_dialect(...)```
 
 ```cpp
 csv::Reader csv;
