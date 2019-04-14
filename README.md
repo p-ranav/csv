@@ -33,7 +33,7 @@ int main() {
 }
 ```
 
-### Default dialects
+### Standard Dialects
 
 This csv library comes with three standard dialects:	Dialects can be constructed with ```.configure_dialect(...)```
 
