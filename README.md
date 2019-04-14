@@ -9,7 +9,8 @@
 ## Table of Contents
 
 - [Reading CSV files](#reading-csv-files)
-  * [Configuring Dialects](#configuring-dialects)
+  * [Standard Dialects](#standard-dialects)
+  * [Configuring Custom Dialects](#configuring-custom-dialects)
   * [Trimming Characters](#trimming-characters)
   * [Ignoring Columns](#ignoring-columns)
   * [Filtering Rows](#filtering-rows)
@@ -31,6 +32,16 @@ int main() {
   }
 }
 ```
+
+### Default dialects
+
+This csv library comes with three standard dialects:	Dialects can be constructed with ```.configure_dialect(...)```
+
+ | Name | Description |	
+|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------|	
+| excel | The excel dialect defines the usual properties of an Excel-generated CSV file |	
+| excel_tab | The excel_tab dialect defines the usual properties of an Excel-generated TAB-delimited file |	
+| unix | The unix dialect defines the usual properties of a CSV file generated on UNIX systems, i.e. using  '\n' as line terminator and quoting all fields |	
 
 ### Configuring Dialects
 
