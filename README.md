@@ -9,8 +9,8 @@
 ## Table of Contents
 
 - [Reading CSV files](#reading-csv-files)
-  * [Default dialects](#default-dialects)
-  * [Configuring custom dialects](#configuring-custom-dialects)
+  * [Standard Dialects](#standard-dialects)
+  * [Configuring Custom Dialects](#configuring-custom-dialects)
   * [Trimming Characters](#trimming-characters)
   * [Ignoring Columns](#ignoring-columns)
   * [Filtering Rows](#filtering-rows)
@@ -33,17 +33,17 @@ int main() {
 }
 ```
 
-### Default dialects
+### Standard Dialects
 
 This csv library comes with three standard dialects:
 
-| Name | Description |
-|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| excel | The excel dialect defines the usual properties of an Excel-generated CSV file |
-| excel_tab | The excel_tab dialect defines the usual properties of an Excel-generated TAB-delimited file |
-| unix | The unix dialect defines the usual properties of a CSV file generated on UNIX systems, i.e. using  '\n' as line terminator and quoting all fields |
+ | Name | Description |	
+|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------|	
+| excel | The excel dialect defines the usual properties of an Excel-generated CSV file |	
+| excel_tab | The excel_tab dialect defines the usual properties of an Excel-generated TAB-delimited file |	
+| unix | The unix dialect defines the usual properties of a CSV file generated on UNIX systems, i.e. using  '\n' as line terminator and quoting all fields |	
 
-### Configuring custom dialects
+### Configuring Custom Dialects
 
 Custom dialects can be constructed with ```.configure_dialect(...)```
 
@@ -51,7 +51,6 @@ Custom dialects can be constructed with ```.configure_dialect(...)```
 csv::Reader csv;
 csv.configure_dialect("my fancy dialect")
   .delimiter("")
-  .line_terminator("")
   .quote_character('"')
   .double_quote(true)
   .skip_initial_space(false)
@@ -67,7 +66,6 @@ if (csv.read("foo.csv") {
 | Property | Data Type | Description |
 |--------------------|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | delimiter | ```std::string``` | specifies the character sequence which should separate fields (aka columns). Default = ```","``` |
-| line_terminator | ```std::string``` | specifies the character sequence which should terminate rows. Default = ```"\r\n"``` |
 | quote_character | ```char``` | specifies a one-character string to use as the quoting character. Default = ```'"'``` |
 | double_quote | ```bool``` | controls the handling of quotes inside fields. If true, two consecutive quotes should be interpreted as one. Default = ```true``` |
 | skip_initial_space | ```bool``` | specifies how to interpret whitespace which immediately follows a delimiter; if false, it means that whitespace immediately after a delimiter should be treated as part of the following field. Default = ```false``` |
