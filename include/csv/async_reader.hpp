@@ -52,7 +52,8 @@ namespace csv {
       processing_thread_started_(false),
       total_number_of_rows_(0),
       row_iterator_index_(0),
-      done_processing_(false) {
+      done_processing_(false),
+      stopped_processing_(false) {
 
       std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
       unix_dialect
@@ -77,6 +78,14 @@ namespace csv {
         .double_quote(true)
         .header(true);
       dialects_["excel_tab"] = excel_tab_dialect;
+    }
+
+    ~AsyncReader() {
+      if (!stopped_processing_) {
+        done_reading();
+        if (reading_thread_started_) reading_thread_.join();
+        if (processing_thread_started_) processing_thread_.join();
+      }      
     }
 
     bool has_next() {
@@ -104,13 +113,14 @@ namespace csv {
     void start_reading(const std::string& filename) {
       filename_ = filename;
       reading_thread_done_future_ = reading_thread_done_promise_.get_future();
-      reading_thread_ = std::thread(&Reader::read_internal, this, &reading_thread_done_future_);
+      reading_thread_ = std::thread(&AsyncReader::read_internal, this, &reading_thread_done_future_);
       reading_thread_started_ = true;
       while(!has_next()) {}
       return;
     }
 
     void stop_reading() {
+      stopped_processing_ = true;
       done_reading();
       if (reading_thread_started_) reading_thread_.join();
       if (processing_thread_started_) processing_thread_.join();
@@ -214,7 +224,7 @@ namespace csv {
 
       // Start processing thread
       processing_thread_done_future_ = processing_thread_done_promise_.get_future();
-      processing_thread_ = std::thread(&Reader::process_values, this, &processing_thread_done_future_);
+      processing_thread_ = std::thread(&AsyncReader::process_values, this, &processing_thread_done_future_);
       processing_thread_started_ = true;
       
       // Get lines one at a time, split on the delimiter and 
@@ -395,7 +405,8 @@ namespace csv {
     std::promise<bool> processing_thread_done_promise_;
     std::future<bool> processing_thread_done_future_;
 
-    bool done_processing_ = false;
+    bool done_processing_;
+    bool stopped_processing_;
     std::mutex done_mutex_;
 
     moodycamel::ConcurrentQueue<std::string> values_;
