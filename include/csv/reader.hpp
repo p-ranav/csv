@@ -184,8 +184,6 @@ namespace csv {
         stream.seekg(length, std::ios_base::beg);
       }
 
-      for (auto& h : headers_) std::cout << h << std::endl;
-
       // Start processing thread
       done_future_ = done_promise_.get_future();
       thread_ = std::thread(&Reader::process_values, this, &done_future_);
@@ -337,6 +335,7 @@ namespace csv {
       std::shared_ptr<std::vector<std::string>> result = std::make_shared<std::vector<std::string>>();
       std::string sub_result = "";
       bool discard_delimiter = false;
+      size_t quotes_encountered = 0;
       
       // a,b,c
       // ^
@@ -354,17 +353,25 @@ namespace csv {
           else {
             // ch *might* be the start of a delimiter sequence
             if (j + 1 == delimiter.size()) {
-              // Reached end of delimiter sequence without breaking
-              // delimiter detected!
-              delimiter_detected = true;
-              result->push_back(trim(sub_result));
-              sub_result = "";
+              if (quotes_encountered % 2 == 0) {
+                // Reached end of delimiter sequence without breaking
+                // delimiter detected!
+                delimiter_detected = true;
+                result->push_back(trim(sub_result));
+                sub_result = "";
 
-              // If enabled, skip initial space right after delimiter
-              if (i + 1 < input_string.size()) {
-                if (dialect->skip_initial_space_ && input_string[i + 1] == ' ') {
-                  i = i + 1;
+                // If enabled, skip initial space right after delimiter
+                if (i + 1 < input_string.size()) {
+                  if (dialect->skip_initial_space_ && input_string[i + 1] == ' ') {
+                    i = i + 1;
+                  }
                 }
+                quotes_encountered = 0;
+              }
+              else {
+                sub_result += input_string[i];
+                i = i + 1;
+                if (i == input_string.size()) break;
               }
             }
             else {
@@ -378,6 +385,14 @@ namespace csv {
         // base case
         if (!delimiter_detected)
           sub_result += input_string[i];
+
+        if (input_string[i] == quote_character)
+          quotes_encountered += 1;
+        if (input_string[i] == quote_character &&
+          double_quote &&
+          sub_result.size() >= 2 &&
+          sub_result[sub_result.size() - 2] == input_string[i])
+          quotes_encountered -= 1;
       }
 
       if (sub_result != "")
