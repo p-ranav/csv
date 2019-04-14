@@ -7,11 +7,11 @@ TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
 
   if (csv.read("inputs/test_01.csv")) {
     auto rows = csv.rows();
-    //for (auto& row : rows) {
-    //  for (auto&[key, value] : row) {
-    //    std::cout << key << " : " << value << std::endl;
-    //  }
-    //}
+    for (auto& row : rows) {
+      for (auto&[k, v] : row) {
+        std::cout << k << ": " << v << std::endl;
+      }
+    }
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
     REQUIRE(rows[0]["b"] == "2");

@@ -184,6 +184,8 @@ namespace csv {
         stream.seekg(length, std::ios_base::beg);
       }
 
+      for (auto& h : headers_) std::cout << h << std::endl;
+
       // Start processing thread
       done_future_ = done_promise_.get_future();
       thread_ = std::thread(&Reader::process_values, this, &done_future_);
@@ -331,68 +333,55 @@ namespace csv {
     std::vector<std::string>
       split(const std::string& input_string, const std::string& delimiter,
         char quote_character, bool double_quote, std::shared_ptr<Dialect> dialect) {
-      // Initialize result
+      
       std::shared_ptr<std::vector<std::string>> result = std::make_shared<std::vector<std::string>>();
-      std::string substring = "";
+      std::string sub_result = "";
+      bool discard_delimiter = false;
+      
+      // a,b,c
+      // ^
+      for (size_t i = 0; i < input_string.size(); ++i) {
+                
+        // Check if ch is the start of a delimiter sequence
+        bool delimiter_detected = false;
+        for (size_t j = 0; j < delimiter.size(); ++j) {
 
-      size_t num_quotes = 0;
-      for (size_t i = 0; i < input_string.size(); i++) {
-        char current = input_string[i];
-        if (current == quote_character) {
-          num_quotes += 1;
-          if (double_quote) {
-            if (i > 0 && input_string[i - 1] == quote_character) {
-              num_quotes -= 1;
-            }
+          char ch = input_string[i];
+          if (ch != delimiter[j]) {
+            delimiter_detected = false;
+            break;
           }
-        }
-
-        // num_quotes -> number of quotes encountered SO FAR
-        // If this is even, the quotes are closed - any delimiter is legit
-        // If this is odd, disregard any delimiter encountered
-
-        for (size_t j = 0; j < delimiter.size(); j++) {
-
-          if (current == delimiter[j]) {
+          else {
+            // ch *might* be the start of a delimiter sequence
             if (j + 1 == delimiter.size()) {
-              if (num_quotes % 2 == 0) {
-                result->push_back(trim(substring));
-                substring = "";
-                num_quotes = 0;
-                if (i + 1 < input_string.size()) {
-                  if (input_string[i + 1] == ' ' && dialect->skip_initial_space_) {
-                    i = i + 1;
-                    current = input_string[i];
-                  }
+              // Reached end of delimiter sequence without breaking
+              // delimiter detected!
+              delimiter_detected = true;
+              result->push_back(trim(sub_result));
+              sub_result = "";
+
+              // If enabled, skip initial space right after delimiter
+              if (i + 1 < input_string.size()) {
+                if (dialect->skip_initial_space_ && input_string[i + 1] == ' ') {
+                  i = i + 1;
                 }
-              }
-              else {
-                // num_quotes is odd
-                // save current
-                substring += current;
               }
             }
             else {
-              if (i + 1 < input_string.size()) {
-                i = i + 1;
-                current = input_string[i];
-              }
-              else {
-                if (substring != "")
-                  result->push_back(trim(substring));
-              }
+              // Keep looking
+              i = i + 1;
+              if (i == input_string.size()) break;
             }
           }
-          else {
-            substring += current;
-            break; // current isn't a delimiter
-          }
-
         }
+
+        // base case
+        if (!delimiter_detected)
+          sub_result += input_string[i];
       }
 
-      if (substring != "")
-        result->push_back(trim(substring));
+      if (sub_result != "")
+        result->push_back(trim(sub_result));
 
       return *result;
     }
