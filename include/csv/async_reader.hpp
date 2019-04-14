@@ -156,21 +156,6 @@ namespace csv {
       }
     }
 
-    std::vector<std::map<std::string, std::string>> rows() {
-      return rows_;
-    }
-
-    std::vector<std::string> cols() {
-      return headers_;
-    }
-
-    std::vector<std::map<std::string, std::string>>
-      filter(std::function<bool(std::map<std::string, std::string>)> filter_function) {
-      std::vector<std::map<std::string, std::string>> result;
-      std::copy_if(rows_.begin(), rows_.end(), std::back_inserter(result), filter_function);
-      return result;
-    }
-
   private:
     bool front(std::string& value) {
       return values_.try_dequeue(value);
