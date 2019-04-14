@@ -7,6 +7,11 @@ TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
 
   if (csv.read("inputs/test_01.csv")) {
     auto rows = csv.rows();
+    //for (auto& row : rows) {
+    //  for (auto&[key, value] : row) {
+    //    std::cout << key << " : " << value << std::endl;
+    //  }
+    //}
     REQUIRE(rows.size() == 2);
     REQUIRE(rows[0]["a"] == "1");
     REQUIRE(rows[0]["b"] == "2");
@@ -38,7 +43,7 @@ TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter", "[simple cs
 TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter using skip_initial_space_", "[simple csv]") {
   csv::Reader csv;
   csv.configure_dialect("test_dialect")
-    .delimiter(",")
+    .delimiter(", ")
     .skip_initial_space(true);
 
   if (csv.read("inputs/test_02.csv")) {
@@ -166,8 +171,8 @@ TEST_CASE("Parse the most basic of CSV buffers - Log with header", "[simple csv]
   csv::Reader csv;
 
   csv.configure_dialect("test_dialect")
-    .delimiter(" :: ")
-    .trim_characters('[', ']');
+    .delimiter("::")
+    .trim_characters(' ', '[', ']');
 
   if (csv.read("inputs/test_10.csv")) {
     auto rows = csv.rows();
