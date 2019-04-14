@@ -2,18 +2,18 @@
 
 ## Highlights
 
-* Header-only library to read/write CSV files
+* Header-only library to parse CSV files
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
 ## Table of Contents
 
 - [Reading CSV files](#reading-csv-files)
-  * [Standard Dialects](#standard-dialects)
-  * [Configuring Custom Dialects](#configuring-custom-dialects)
-  * [Trimming Characters](#trimming-characters)
-  * [Ignoring Columns](#ignoring-columns)
-  * [Filtering Rows](#filtering-rows)
+- [Standard Dialects](#standard-dialects)
+- [Configuring Custom Dialects](#configuring-custom-dialects)
+- [Trimming Characters](#trimming-characters)
+- [Ignoring Columns](#ignoring-columns)
+- [Filtering Rows](#filtering-rows)
 
 ## Reading CSV files
 
