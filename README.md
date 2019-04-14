@@ -6,16 +6,7 @@
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
-## Table of Contents
-
-- [Reading CSV files](#reading-csv-files)
-- [Standard Dialects](#standard-dialects)
-- [Configuring Custom Dialects](#configuring-custom-dialects)
-- [Trimming Characters](#trimming-characters)
-- [Ignoring Columns](#ignoring-columns)
-- [Filtering Rows](#filtering-rows)
-
-## Reading CSV files
+## Quick Start
 
 To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
 
