@@ -171,6 +171,14 @@ namespace csv {
       // Get first line and find headers by splitting on delimiters
       std::string first_line;
       getline(stream, first_line);
+
+      // Under Linux, getline removes \n from the input stream. 
+      // However, it does not remove the \r
+      // Let's remove it
+      if (first_line.size() > 0 && first_line[first_line.size() - 1] == '\r') {
+        first_line.pop_back();
+      }
+      
       auto first_line_split = split(first_line, dialect->delimiter_, 
         dialect->quote_character_, dialect->double_quote_, dialect);
       if (dialect->header_) {
@@ -277,16 +285,13 @@ namespace csv {
           row[column_name] = value;
           index += 1;
           if (index != 0 && index % cols == 0) {
-            for (auto&[key, value] : dialect->ignore_columns_) {
+            for (auto&[key, value] : dialect->ignore_columns_)
               row.erase(key);
-            }
             rows_.push_back(row);
           }
         }
-        const auto future_status =
-          future_object->wait_for(std::chrono::seconds(0));
-        if (future_status == std::future_status::ready &&
-          values_.size_approx() == 0) {
+        const auto future_status = future_object->wait_for(std::chrono::seconds(0));
+        if (future_status == std::future_status::ready && values_.size_approx() == 0) {
           std::unique_lock<std::mutex> lock(ready_mutex_);
           ready_ = true;
           ready_cv_.notify_all();
@@ -337,8 +342,6 @@ namespace csv {
       bool discard_delimiter = false;
       size_t quotes_encountered = 0;
       
-      // a,b,c
-      // ^
       for (size_t i = 0; i < input_string.size(); ++i) {
                 
         // Check if ch is the start of a delimiter sequence
