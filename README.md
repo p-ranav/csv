@@ -16,7 +16,7 @@ To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv
 int main() {
   csv::Reader csv;
   if (csv.read("test.csv")) {         // reads a CSV file and builds a list of dictionaries
-    for (auto& row : csv.rows()) {    // test.csv => [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
+    for (auto& row : csv.rows()) {    // csv.rows() => [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
       auto foo = row["foo"];
       // do something
     }
