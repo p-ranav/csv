@@ -54,7 +54,6 @@ namespace csv {
     AsyncReader() :
       filename_(""),
       columns_(0),
-      ready_(false),
       current_dialect_("excel"),
       reading_thread_started_(false),
       processing_thread_started_(false),
@@ -89,11 +88,6 @@ namespace csv {
     ~AsyncReader() {
       if (reading_thread_started_) reading_thread_.join();
       if (processing_thread_started_) processing_thread_.join();
-    }
-
-    size_t num_rows() {
-      std::lock_guard<std::mutex> lock(size_mutex_);
-      return expected_number_of_rows_;
     }
 
     bool done() {
@@ -174,6 +168,16 @@ namespace csv {
       }
     }
 
+    std::vector<std::unordered_map<std::string, std::string>> rows() {
+      std::vector<std::unordered_map<std::string, std::string>> rows;
+      while (!done()) {
+        if (has_next()) {
+          rows.push_back(next());
+        }
+      }
+      return rows;
+    }
+
   private:
     bool front(std::string& value) {
       return values_.try_dequeue(value);
@@ -220,9 +224,9 @@ namespace csv {
 
       // Start processing thread
       processing_thread_ = std::thread(&AsyncReader::process_values, this);
-      done_mutex_.lock();
+      processing_mutex_.lock();
       processing_thread_started_ = true;
-      done_mutex_.unlock();
+      processing_mutex_.unlock();
 
       // Get lines one at a time, split on the delimiter and 
       // enqueue the split results into the values_ queue
@@ -376,10 +380,7 @@ namespace csv {
     moodycamel::ConcurrentQueue<std::unordered_map<std::string, std::string>> rows_;
     moodycamel::ConcurrentQueue<size_t> number_of_rows_processed_;
 
-    bool ready_;
-    std::condition_variable ready_cv_;
-    std::mutex done_mutex_;
-    std::mutex rows_mutex_;
+    std::mutex processing_mutex_;
 
     // Member variables to keep track of rows/cols
     size_t columns_;
