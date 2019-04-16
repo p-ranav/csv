@@ -98,10 +98,7 @@ namespace csv {
     }
 
     bool done() {
-      done_mutex_.lock();
-      bool processing_thread_started = processing_thread_started_;
-      done_mutex_.unlock();
-      if (processing_thread_started) {
+      if (processing_thread_started_) {
         size_mutex_.lock();
         bool result = (row_iterator_index_ == expected_number_of_rows_);
         size_mutex_.unlock();
@@ -118,11 +115,12 @@ namespace csv {
     }
 
     std::unordered_map<std::string, std::string> next() {
-      rows_mutex_.lock();
-      auto row = rows_[row_iterator_index_];
+      size_mutex_.lock();
       row_iterator_index_ += 1;
-      rows_mutex_.unlock();
-      return row;
+      size_mutex_.unlock();
+      std::unordered_map<std::string, std::string> result;
+      rows_queue_.try_dequeue(result);
+      return result;
     }
 
     void read(const std::string& filename) {
@@ -244,6 +242,8 @@ namespace csv {
       std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
       auto ignore_columns = dialect->ignore_columns_;
       std::string value;
+      size_t i;
+      std::string column_name;
       while (true) {
         size_mutex_.lock();
         if (total_number_of_rows_ == expected_number_of_rows_) {
@@ -252,15 +252,13 @@ namespace csv {
         }
         size_mutex_.unlock();
         if (front(value)) {
-          size_t i = index % cols;
-          auto column_name = headers_[i];
+          i = index % cols;
+          column_name = headers_[i];
           if (ignore_columns.count(column_name) == 0)
             current_row_[column_name] = value;
           index += 1;
           if (index != 0 && index % cols == 0) {
-            rows_mutex_.lock();
-            rows_.push_back(current_row_);
-            rows_mutex_.unlock();
+            rows_queue_.enqueue(current_row_);
             size_mutex_.lock();
             total_number_of_rows_ += 1;
             size_mutex_.unlock();
@@ -376,15 +374,17 @@ namespace csv {
     std::vector<std::string> headers_;
     std::unordered_map<std::string, std::string> current_row_;
     std::vector<std::unordered_map<std::string, std::string>> rows_;
+    moodycamel::ConcurrentQueue<std::unordered_map<std::string, std::string>> rows_queue_;
+
     bool ready_;
     std::condition_variable ready_cv_;
     std::mutex done_mutex_;
+    std::mutex rows_mutex_;
 
     // Member variables to keep track of rows/cols
     size_t columns_;
     size_t expected_number_of_rows_;
     std::mutex entries_mutex_;
-    std::mutex rows_mutex_;
 
     // Member variables to enable streaming
     size_t total_number_of_rows_;
