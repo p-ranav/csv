@@ -58,7 +58,6 @@ namespace csv {
       current_dialect_("excel"),
       reading_thread_started_(false),
       processing_thread_started_(false),
-      total_number_of_rows_(0),
       row_iterator_index_(0),
       expected_number_of_rows_(0) {
 
@@ -108,9 +107,11 @@ namespace csv {
     }
 
     bool has_next() {
+      size_t rows = 0;
+      number_of_rows_processed_.try_dequeue(rows);
       std::lock_guard<std::mutex> lock(size_mutex_);
       bool result = (row_iterator_index_ < expected_number_of_rows_
-        && row_iterator_index_ < total_number_of_rows_);
+        && row_iterator_index_ < rows);
       return result;
     }
 
@@ -244,13 +245,13 @@ namespace csv {
       std::string value;
       size_t i;
       std::string column_name;
+      size_t number_of_rows = 0, expected_number_of_rows = 0;
+      size_mutex_.lock();
+      expected_number_of_rows = expected_number_of_rows_;
+      size_mutex_.unlock();
       while (true) {
-        size_mutex_.lock();
-        if (total_number_of_rows_ == expected_number_of_rows_) {
-          size_mutex_.unlock();
+        if (number_of_rows == expected_number_of_rows)
           break;
-        }
-        size_mutex_.unlock();
         if (front(value)) {
           i = index % cols;
           column_name = headers_[i];
@@ -259,9 +260,8 @@ namespace csv {
           index += 1;
           if (index != 0 && index % cols == 0) {
             rows_.enqueue(current_row_);
-            size_mutex_.lock();
-            total_number_of_rows_ += 1;
-            size_mutex_.unlock();
+            number_of_rows += 1;
+            number_of_rows_processed_.enqueue(number_of_rows);
           }
         }
       }
@@ -374,6 +374,7 @@ namespace csv {
     std::vector<std::string> headers_;
     std::unordered_map<std::string, std::string> current_row_;
     moodycamel::ConcurrentQueue<std::unordered_map<std::string, std::string>> rows_;
+    moodycamel::ConcurrentQueue<size_t> number_of_rows_processed_;
 
     bool ready_;
     std::condition_variable ready_cv_;
@@ -386,7 +387,6 @@ namespace csv {
     std::mutex entries_mutex_;
 
     // Member variables to enable streaming
-    size_t total_number_of_rows_;
     size_t row_iterator_index_;
     std::mutex size_mutex_;
 
