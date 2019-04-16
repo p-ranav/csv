@@ -58,8 +58,7 @@ namespace csv {
       reading_thread_started_(false),
       processing_thread_started_(false),
       row_iterator_index_(0),
-      expected_number_of_rows_(0),
-      ignore_columns_enabled(false) {
+      expected_number_of_rows_(0) {
 
       std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
       unix_dialect
@@ -231,9 +230,6 @@ namespace csv {
       for (auto&[key, value] : dialects_[current_dialect_]->ignore_columns_)
         current_row_.erase(key);
 
-      if (dialects_[current_dialect_]->ignore_columns_.size() > 0)
-        ignore_columns_enabled = true;
-
       // Start processing thread
       processing_thread_ = std::thread(&Reader::process_values, this);
       processing_mutex_.lock();
@@ -271,7 +267,7 @@ namespace csv {
         if (front(value)) {
           i = index % cols;
           column_name = headers_[i];
-          if (!ignore_columns_enabled && ignore_columns.count(column_name) == 0)
+          if (ignore_columns.count(column_name) == 0)
             current_row_[column_name] = value;
           index += 1;
           if (index != 0 && index % cols == 0) {
@@ -412,7 +408,6 @@ namespace csv {
     moodycamel::ConcurrentQueue<std::string> values_;
     std::string current_dialect_;
     robin_map<std::string, std::shared_ptr<Dialect>> dialects_;
-    bool ignore_columns_enabled;
   };
 
 }
