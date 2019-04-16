@@ -90,6 +90,10 @@ namespace csv {
       if (processing_thread_started_) processing_thread_.join();
     }
 
+    bool busy() {
+      return !done();
+    }
+
     bool done() {
       if (processing_thread_started_) {
         size_mutex_.lock();
@@ -100,7 +104,7 @@ namespace csv {
       else return false;
     }
 
-    bool has_next() {
+    bool ready() {
       size_t rows = 0;
       number_of_rows_processed_.try_dequeue(rows);
       std::lock_guard<std::mutex> lock(size_mutex_);
@@ -109,7 +113,7 @@ namespace csv {
       return result;
     }
 
-    std::unordered_map<std::string, std::string> next() {
+    std::unordered_map<std::string, std::string> next_row() {
       size_mutex_.lock();
       row_iterator_index_ += 1;
       size_mutex_.unlock();
@@ -171,8 +175,8 @@ namespace csv {
     std::vector<std::unordered_map<std::string, std::string>> rows() {
       std::vector<std::unordered_map<std::string, std::string>> rows;
       while (!done()) {
-        if (has_next()) {
-          rows.push_back(next());
+        if (ready()) {
+          rows.push_back(next_row());
         }
       }
       return rows;
