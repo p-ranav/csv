@@ -119,7 +119,7 @@ namespace csv {
       row_iterator_index_ += 1;
       size_mutex_.unlock();
       std::unordered_map<std::string, std::string> result;
-      rows_queue_.try_dequeue(result);
+      rows_.try_dequeue(result);
       return result;
     }
 
@@ -258,7 +258,7 @@ namespace csv {
             current_row_[column_name] = value;
           index += 1;
           if (index != 0 && index % cols == 0) {
-            rows_queue_.enqueue(current_row_);
+            rows_.enqueue(current_row_);
             size_mutex_.lock();
             total_number_of_rows_ += 1;
             size_mutex_.unlock();
@@ -373,8 +373,7 @@ namespace csv {
     std::ifstream stream_;
     std::vector<std::string> headers_;
     std::unordered_map<std::string, std::string> current_row_;
-    std::vector<std::unordered_map<std::string, std::string>> rows_;
-    moodycamel::ConcurrentQueue<std::unordered_map<std::string, std::string>> rows_queue_;
+    moodycamel::ConcurrentQueue<std::unordered_map<std::string, std::string>> rows_;
 
     bool ready_;
     std::condition_variable ready_cv_;
