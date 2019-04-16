@@ -157,8 +157,8 @@ namespace csv {
 
     std::vector<std::string> list_dialects() {
       std::vector<std::string> result;
-      for (auto&[key, value] : dialects_)
-        result.push_back(key);
+      for (auto&kvpair : dialects_)
+        result.push_back(kvpair.first);
       return result;
     }
 
@@ -228,8 +228,8 @@ namespace csv {
 
       for (auto& header : headers_)
         current_row_[header] = "";
-      for (auto&[key, value] : dialects_[current_dialect_]->ignore_columns_)
-        current_row_.erase(key);
+      for (auto&kvpair : dialects_[current_dialect_]->ignore_columns_)
+        current_row_.erase(kvpair.first);
 
       // Start processing thread
       processing_thread_ = std::thread(&Reader::process_values, this);
