@@ -3,7 +3,7 @@
 ## Highlights
 
 * Header-only library
-* Fast, multi-threaded processing with lock-free queues
+* Fast, multi-threaded processing
 * Requires C++17
 * BSD 2-Clause "Simplified" License
 
