@@ -4,7 +4,7 @@
 
 * Header-only library
 * Fast, asynchronous, multi-threaded processing
-* Requires C++17
+* Requires C++11
 * BSD 2-Clause "Simplified" License
 
 ## Table of Contents	## Quick Start
