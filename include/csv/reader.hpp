@@ -41,14 +41,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace csv {
 
-  struct TestEOL {
-    bool operator()(char c) {
-      last = c;
-      return last == '\n';
-    }
-    char last;
-  };
-
   class Reader {
   public:
     Reader() :
@@ -58,7 +50,14 @@ namespace csv {
       reading_thread_started_(false),
       processing_thread_started_(false),
       row_iterator_index_(0),
-      expected_number_of_rows_(0) {
+      expected_number_of_rows_(0),
+      values_ptoken_(ProducerToken(values_)),
+      values_ctoken_(ConsumerToken(values_)),
+      rows_ptoken_(ProducerToken(rows_)),
+      rows_ctoken_(ConsumerToken(rows_)),
+      done_index_(0),
+      ready_index_(0),
+      next_index_(0) {
 
       std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
       unix_dialect
@@ -96,9 +95,9 @@ namespace csv {
 
     bool done() {
       if (processing_thread_started_) {
-        size_mutex_.lock();
-        bool result = (row_iterator_index_ == expected_number_of_rows_);
-        size_mutex_.unlock();
+        row_iterator_queue_.try_dequeue(done_index_);
+        row_iterator_queue_.enqueue(done_index_);
+        bool result = (expected_number_of_rows_ == 0 || done_index_ + 1 == expected_number_of_rows_);
         return result;
       }
       else return false;
@@ -107,18 +106,16 @@ namespace csv {
     bool ready() {
       size_t rows = 0;
       number_of_rows_processed_.try_dequeue(rows);
-      std::lock_guard<std::mutex> lock(size_mutex_);
-      bool result = (row_iterator_index_ < expected_number_of_rows_
-        && row_iterator_index_ < rows);
+      row_iterator_queue_.try_dequeue(ready_index_);
+      bool result = (ready_index_ < expected_number_of_rows_ && ready_index_ < rows);
       return result;
     }
 
     robin_map<std::string, std::string> next_row() {
-      size_mutex_.lock();
-      row_iterator_index_ += 1;
-      size_mutex_.unlock();
+      row_iterator_queue_.enqueue(next_index_);
+      next_index_ += 1;
       robin_map<std::string, std::string> result;
-      rows_.try_dequeue(result);
+      rows_.try_dequeue(rows_ctoken_, result);
       return result;
     }
 
@@ -188,7 +185,7 @@ namespace csv {
 
   private:
     bool front(std::string& value) {
-      return values_.try_dequeue(value);
+      return values_.try_dequeue(values_ctoken_, value);
     }
 
     void read_internal() {
@@ -244,7 +241,7 @@ namespace csv {
           row.pop_back();
         auto row_split = split(row, dialect);
         for (auto& value : row_split)
-          values_.enqueue(value);
+          values_.enqueue(values_ptoken_, value);
       }
       stream_.close();
     }
@@ -257,12 +254,9 @@ namespace csv {
       std::string value;
       size_t i;
       std::string column_name;
-      size_t number_of_rows = 0, expected_number_of_rows = 0;
-      size_mutex_.lock();
-      expected_number_of_rows = expected_number_of_rows_;
-      size_mutex_.unlock();
+      size_t number_of_rows = 0;
       while (true) {
-        if (number_of_rows == expected_number_of_rows)
+        if (number_of_rows == expected_number_of_rows_)
           break;
         if (front(value)) {
           i = index % cols;
@@ -271,7 +265,7 @@ namespace csv {
             current_row_[column_name] = value;
           index += 1;
           if (index != 0 && index % cols == 0) {
-            rows_.enqueue(current_row_);
+            rows_.try_enqueue(current_row_);
             number_of_rows += 1;
             number_of_rows_processed_.enqueue(number_of_rows);
           }
@@ -386,6 +380,8 @@ namespace csv {
     std::vector<std::string> headers_;
     robin_map<std::string, std::string> current_row_;
     ConcurrentQueue<robin_map<std::string, std::string>> rows_;
+    ProducerToken rows_ptoken_;
+    ConsumerToken rows_ctoken_;
     ConcurrentQueue<size_t> number_of_rows_processed_;
 
     std::mutex processing_mutex_;
@@ -396,6 +392,7 @@ namespace csv {
     std::mutex entries_mutex_;
 
     // Member variables to enable streaming
+    ConcurrentQueue<size_t> row_iterator_queue_;
     size_t row_iterator_index_;
     std::mutex size_mutex_;
 
@@ -406,8 +403,13 @@ namespace csv {
     bool processing_thread_started_;
 
     ConcurrentQueue<std::string> values_;
+    ProducerToken values_ptoken_;
+    ConsumerToken values_ctoken_;
     std::string current_dialect_;
     robin_map<std::string, std::shared_ptr<Dialect>> dialects_;
+    size_t done_index_;
+    size_t ready_index_;
+    size_t next_index_;
   };
 
 }
