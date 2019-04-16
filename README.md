@@ -8,14 +8,16 @@
 
 ## Table of Contents	## Quick Start
 
-- [Reading CSV files](#reading-csv-files)	
+- [Blocking CSV Reader](#blocking-csv-reader)	
   * [Standard Dialects](#standard-dialects)	
   * [Configuring Custom Dialects](#configuring-custom-dialects)	
   * [Trimming Characters](#trimming-characters)	
   * [Ignoring Columns](#ignoring-columns)	
   * [Filtering Rows](#filtering-rows)	
+- [Asyncrhonous CSV Reader](#asynchronous-csv-reader)
+  * [Iterator Pattern](#iterator-pattern)
 
-## Reading CSV files
+## Blocking CSV Reader
 
 To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
 
@@ -162,6 +164,25 @@ if (csv.read("test.csv")) {
 ```
 
 NOTE: Filtering does not mutate the original list of rows. ```csv.rows()``` will still return all the original rows. This call simply returns a copy with the filtered results. 
+
+- [Asyncrhonous CSV Reader](#asynchronous-csv-reader)
+  * [Iterator Pattern](#iterator-pattern)
+  
+## Asynchronous CSV Reader
+
+### Iterator Pattern
+
+```cpp
+csv::AsyncReader reader;
+reader.read("weather.csv");
+
+while(!reader.done()) {
+  if (reader.has_next()) {
+    auto row = reader.next();
+    // do something
+  }
+}
+```
 
 ## Supported Compilers
 * GCC >= 7.0.0
