@@ -1,6 +1,7 @@
 #pragma once
 #include <catch.hpp>
 #include <csv/reader.hpp>
+#include <csv/async_reader.hpp>
 
 TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
   csv::Reader csv;
@@ -15,6 +16,27 @@ TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
     REQUIRE(rows[1]["b"] == "5");
     REQUIRE(rows[1]["c"] == "6");
   }
+}
+
+TEST_CASE("Parse the most basic of CSV buffers (Async)", "[simple csv]") {
+  csv::AsyncReader csv;
+
+  csv.read_async("inputs/test_01.csv");
+  std::vector<std::unordered_map<std::string, std::string>> rows;
+  while (!csv.done()) {
+    if (csv.has_next()) {
+      auto row = csv.next();
+      rows.push_back(row);
+    }
+  }
+
+  REQUIRE(rows.size() == 2);
+  REQUIRE(rows[0]["a"] == "1");
+  REQUIRE(rows[0]["b"] == "2");
+  REQUIRE(rows[0]["c"] == "3");
+  REQUIRE(rows[1]["a"] == "4");
+  REQUIRE(rows[1]["b"] == "5");
+  REQUIRE(rows[1]["c"] == "6");
 }
 
 TEST_CASE("Parse the most basic of CSV buffers with ', ' delimiter", "[simple csv]") {
