@@ -106,10 +106,9 @@ namespace csv {
     }
 
     bool has_next() {
-      size_mutex_.lock();
+      std::lock_guard<std::mutex> lock(size_mutex_);
       bool result = (row_iterator_index_ < expected_number_of_rows_
         && row_iterator_index_ < total_number_of_rows_);
-      size_mutex_.unlock();
       return result;
     }
 

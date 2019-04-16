@@ -32,7 +32,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 #include <thread>
 #include <future>
 #include <chrono>
@@ -118,7 +118,7 @@ namespace csv {
       }
     }
 
-    std::vector<std::map<std::string, std::string>> rows() {
+    std::vector<std::unordered_map<std::string, std::string>> rows() {
       return rows_;
     }
 
@@ -126,9 +126,9 @@ namespace csv {
       return headers_;
     }
 
-    std::vector<std::map<std::string, std::string>>
-      filter(std::function<bool(std::map<std::string, std::string>)> filter_function) {
-      std::vector<std::map<std::string, std::string>> result;
+    std::vector<std::unordered_map<std::string, std::string>>
+      filter(std::function<bool(std::unordered_map<std::string, std::string>)> filter_function) {
+      std::vector<std::unordered_map<std::string, std::string>> result;
       std::copy_if(rows_.begin(), rows_.end(), std::back_inserter(result), filter_function);
       return result;
     }
@@ -198,7 +198,7 @@ namespace csv {
     void process_values(std::future<bool> * future_object) {
       size_t index = 0;
       size_t cols = headers_.size();
-      std::map<std::string, std::string> row;
+      std::unordered_map<std::string, std::string> row;
       std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
       while (true) {
         std::string value;
@@ -328,7 +328,7 @@ namespace csv {
     std::string filename_;
     size_t columns_;
     std::vector<std::string> headers_;
-    std::vector<std::map<std::string, std::string>> rows_;
+    std::vector<std::unordered_map<std::string, std::string>> rows_;
     bool ready_;
     std::condition_variable ready_cv_;
     std::mutex ready_mutex_;
@@ -338,7 +338,7 @@ namespace csv {
     std::future<bool> done_future_;
     moodycamel::ConcurrentQueue<std::string> values_;
     std::string current_dialect_;
-    std::map<std::string, std::shared_ptr<Dialect>> dialects_;
+    std::unordered_map<std::string, std::shared_ptr<Dialect>> dialects_;
   };
 
 }
