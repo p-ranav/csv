@@ -92,6 +92,11 @@ namespace csv {
       if (processing_thread_started_) processing_thread_.join();
     }
 
+    size_t num_rows() {
+      std::lock_guard<std::mutex> lock(size_mutex_);
+      return expected_number_of_rows_;
+    }
+
     bool done() {
       done_mutex_.lock();
       bool processing_thread_started = processing_thread_started_;
@@ -112,10 +117,12 @@ namespace csv {
       return result;
     }
 
-    std::unordered_map<std::string, std::string>& next() {
-      std::lock_guard<std::mutex> lock(rows_mutex_);
+    std::unordered_map<std::string, std::string> next() {
+      rows_mutex_.lock();
+      auto row = rows_[row_iterator_index_];
       row_iterator_index_ += 1;
-      return rows_[row_iterator_index_];
+      rows_mutex_.unlock();
+      return row;
     }
 
     void read_async(const std::string& filename) {
@@ -166,11 +173,6 @@ namespace csv {
       if (dialects_.find(dialect_name) == dialects_.end()) {
         throw std::runtime_error("error: Dialect " + dialect_name + " not found");
       }
-    }
-
-    size_t num_rows() {
-      std::lock_guard<std::mutex> lock(size_mutex_);
-      return expected_number_of_rows_;
     }
 
   private:
@@ -243,11 +245,12 @@ namespace csv {
       auto ignore_columns = dialect->ignore_columns_;
       std::string value;
       while (true) {
-        {
-          std::lock_guard<std::mutex> lock(size_mutex_);
-          if (total_number_of_rows_ == expected_number_of_rows_)
-            break;
+        size_mutex_.lock();
+        if (total_number_of_rows_ == expected_number_of_rows_) {
+          size_mutex_.unlock();
+          break;
         }
+        size_mutex_.unlock();
         if (front(value)) {
           size_t i = index % cols;
           auto column_name = headers_[i];
