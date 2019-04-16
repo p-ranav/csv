@@ -125,7 +125,7 @@ namespace csv {
       return row;
     }
 
-    void read_async(const std::string& filename) {
+    void read(const std::string& filename) {
       filename_ = filename;
       stream_ = std::ifstream(filename_);
       // new lines will be skipped unless we stop it from happening:    
@@ -304,7 +304,7 @@ namespace csv {
     // returns a vector of substrings after split
     std::vector<std::string> split(const std::string& input_string, std::shared_ptr<Dialect> dialect) {
 
-      std::shared_ptr<std::vector<std::string>> result = std::make_shared<std::vector<std::string>>();
+      std::vector<std::string> result;
       std::string sub_result = "";
       bool discard_delimiter = false;
       size_t quotes_encountered = 0;
@@ -327,7 +327,7 @@ namespace csv {
                 // Reached end of delimiter sequence without breaking
                 // delimiter detected!
                 delimiter_detected = true;
-                result->push_back(trim(sub_result));
+                result.push_back(trim(sub_result));
                 sub_result = "";
 
                 // If enabled, skip initial space right after delimiter
@@ -366,9 +366,9 @@ namespace csv {
       }
 
       if (sub_result != "")
-        result->push_back(trim(sub_result));
+        result.push_back(trim(sub_result));
 
-      return *result;
+      return result;
     }
 
     std::string filename_;
