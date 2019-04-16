@@ -26,7 +26,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #include <string>
 #include <vector>
-#include <map>
+#include <csv/robin_map.hpp>
 
 namespace csv {
 
@@ -36,7 +36,7 @@ namespace csv {
     char line_terminator_;
     char quote_character_;
     bool double_quote_;
-    std::map<std::string, bool> ignore_columns_;
+    robin_map<std::string, bool> ignore_columns_;
     std::vector<char> trim_characters_;
     bool header_;
 

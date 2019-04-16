@@ -26,13 +26,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #include <csv/dialect.hpp>
 #include <csv/queue.hpp>
+#include <csv/robin_map.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include <unordered_map>
 #include <thread>
 #include <future>
 #include <mutex>
@@ -114,11 +114,11 @@ namespace csv {
       return result;
     }
 
-    std::unordered_map<std::string, std::string> next_row() {
+    robin_map<std::string, std::string> next_row() {
       size_mutex_.lock();
       row_iterator_index_ += 1;
       size_mutex_.unlock();
-      std::unordered_map<std::string, std::string> result;
+      robin_map<std::string, std::string> result;
       rows_.try_dequeue(result);
       return result;
     }
@@ -173,8 +173,8 @@ namespace csv {
       }
     }
 
-    std::vector<std::unordered_map<std::string, std::string>> rows() {
-      std::vector<std::unordered_map<std::string, std::string>> rows;
+    std::vector<robin_map<std::string, std::string>> rows() {
+      std::vector<robin_map<std::string, std::string>> rows;
       while (!done()) {
         if (ready()) {
           rows.push_back(next_row());
@@ -384,8 +384,8 @@ namespace csv {
     std::string filename_;
     std::ifstream stream_;
     std::vector<std::string> headers_;
-    std::unordered_map<std::string, std::string> current_row_;
-    moodycamel::ConcurrentQueue<std::unordered_map<std::string, std::string>> rows_;
+    robin_map<std::string, std::string> current_row_;
+    moodycamel::ConcurrentQueue<robin_map<std::string, std::string>> rows_;
     moodycamel::ConcurrentQueue<size_t> number_of_rows_processed_;
 
     std::mutex processing_mutex_;
@@ -407,7 +407,7 @@ namespace csv {
 
     moodycamel::ConcurrentQueue<std::string> values_;
     std::string current_dialect_;
-    std::unordered_map<std::string, std::shared_ptr<Dialect>> dialects_;
+    robin_map<std::string, std::shared_ptr<Dialect>> dialects_;
     bool ignore_columns_enabled;
   };
 
