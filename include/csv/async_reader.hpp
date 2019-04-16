@@ -58,7 +58,8 @@ namespace csv {
       reading_thread_started_(false),
       processing_thread_started_(false),
       row_iterator_index_(0),
-      expected_number_of_rows_(0) {
+      expected_number_of_rows_(0),
+      ignore_columns_enabled(false) {
 
       std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
       unix_dialect
@@ -226,6 +227,9 @@ namespace csv {
       for (auto&[key, value] : dialects_[current_dialect_]->ignore_columns_)
         current_row_.erase(key);
 
+      if (dialects_[current_dialect_]->ignore_columns_.size() > 0)
+        ignore_columns_enabled = true;
+
       // Start processing thread
       processing_thread_ = std::thread(&AsyncReader::process_values, this);
       processing_mutex_.lock();
@@ -263,7 +267,7 @@ namespace csv {
         if (front(value)) {
           i = index % cols;
           column_name = headers_[i];
-          if (ignore_columns.count(column_name) == 0)
+          if (!ignore_columns_enabled && ignore_columns.count(column_name) == 0)
             current_row_[column_name] = value;
           index += 1;
           if (index != 0 && index % cols == 0) {
@@ -283,7 +287,7 @@ namespace csv {
         return !(std::find(dialect->trim_characters_.begin(), dialect->trim_characters_.end(), ch)
           != dialect->trim_characters_.end());
       }));
-      return result;
+      return std::move(result);
     }
 
     // trim white spaces from right end of an input string
@@ -294,7 +298,7 @@ namespace csv {
         return !(std::find(dialect->trim_characters_.begin(), dialect->trim_characters_.end(), ch)
           != dialect->trim_characters_.end());
       }).base(), result.end());
-      return result;
+      return std::move(result);
     }
 
     // trim white spaces from either end of an input string
@@ -374,7 +378,7 @@ namespace csv {
       if (sub_result != "")
         result.push_back(trim(sub_result));
 
-      return result;
+      return std::move(result);
     }
 
     std::string filename_;
@@ -404,6 +408,7 @@ namespace csv {
     moodycamel::ConcurrentQueue<std::string> values_;
     std::string current_dialect_;
     std::unordered_map<std::string, std::shared_ptr<Dialect>> dialects_;
+    bool ignore_columns_enabled;
   };
 
 }
