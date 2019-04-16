@@ -2,6 +2,15 @@
 #include <catch.hpp>
 #include <csv/reader.hpp>
 
+TEST_CASE("Parse an empty CSV", "[simple csv]") {
+  csv::Reader csv;
+  csv.read("inputs/empty.csv");
+  auto rows = csv.rows();
+  auto cols = csv.cols();
+  REQUIRE(rows.size() == 0);
+  REQUIRE(cols.size() == 0);
+}
+
 TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
   csv::Reader csv;
   csv.read("inputs/test_01.csv");

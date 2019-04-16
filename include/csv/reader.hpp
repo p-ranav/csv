@@ -122,13 +122,17 @@ namespace csv {
     void read(const std::string& filename) {
       filename_ = filename;
       stream_ = std::ifstream(filename_);
+      if (!stream_.is_open()) {
+        throw std::runtime_error("error: Failed to open " + filename_);
+      }
+
       // new lines will be skipped unless we stop it from happening:    
       stream_.unsetf(std::ios_base::skipws);
       std::string line;
       while (std::getline(stream_, line))
         ++expected_number_of_rows_;
 
-      if (dialects_[current_dialect_]->header_)
+      if (dialects_[current_dialect_]->header_ && expected_number_of_rows_ > 0)
         expected_number_of_rows_ -= 1;
 
       stream_.clear();
