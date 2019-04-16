@@ -25,7 +25,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 #include <csv/dialect.hpp>
-#include <csv/queue.hpp>
+#include <csv/concurrent_queue.hpp>
 #include <csv/robin_map.hpp>
 #include <iostream>
 #include <fstream>
@@ -385,8 +385,8 @@ namespace csv {
     std::ifstream stream_;
     std::vector<std::string> headers_;
     robin_map<std::string, std::string> current_row_;
-    moodycamel::ConcurrentQueue<robin_map<std::string, std::string>> rows_;
-    moodycamel::ConcurrentQueue<size_t> number_of_rows_processed_;
+    ConcurrentQueue<robin_map<std::string, std::string>> rows_;
+    ConcurrentQueue<size_t> number_of_rows_processed_;
 
     std::mutex processing_mutex_;
 
@@ -405,7 +405,7 @@ namespace csv {
     std::thread processing_thread_;
     bool processing_thread_started_;
 
-    moodycamel::ConcurrentQueue<std::string> values_;
+    ConcurrentQueue<std::string> values_;
     std::string current_dialect_;
     robin_map<std::string, std::shared_ptr<Dialect>> dialects_;
   };
