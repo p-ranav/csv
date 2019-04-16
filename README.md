@@ -8,16 +8,16 @@
 
 ## Table of Contents	## Quick Start
 
-- [Blocking CSV Reader](#blocking-csv-reader)	
-  * [Standard Dialects](#standard-dialects)	
-  * [Configuring Custom Dialects](#configuring-custom-dialects)	
-  * [Trimming Characters](#trimming-characters)	
-  * [Ignoring Columns](#ignoring-columns)	
-  * [Filtering Rows](#filtering-rows)	
-- [Asyncrhonous CSV Reader](#asynchronous-csv-reader)
-  * [Iterator Pattern](#iterator-pattern)
+- [Synchronous Parsing](#synchronous-parsing)	
+   * [Standard Dialects](#standard-dialects)	
+   * [Configuring Custom Dialects](#configuring-custom-dialects)	
+   * [Trimming Characters](#trimming-characters)	
+   * [Ignoring Columns](#ignoring-columns)	
+   * [Filtering Rows](#filtering-rows)	
+- [Asyncrhonous Parsing](#asynchronous-parsing)
+   * [Iterator Pattern](#iterator-pattern)
 
-## Blocking CSV Reader
+## Synchronous Parsing
 
 To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
 
@@ -168,7 +168,7 @@ NOTE: Filtering does not mutate the original list of rows. ```csv.rows()``` will
 - [Asyncrhonous CSV Reader](#asynchronous-csv-reader)
   * [Iterator Pattern](#iterator-pattern)
   
-## Asynchronous CSV Reader
+## Asynchronous Parsing
 
 ### Iterator Pattern
 
