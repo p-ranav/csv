@@ -26,29 +26,40 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #include <csv/dialect.hpp>
 #include <csv/queue.hpp>
+#include <csv/robin_map.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include <unordered_map>
 #include <thread>
 #include <future>
-#include <chrono>
 #include <mutex>
 #include <condition_variable>
+#include <iterator>
 
 namespace csv {
+
+  struct TestEOL {
+    bool operator()(char c) {
+      last = c;
+      return last == '\n';
+    }
+    char last;
+  };
 
   class Reader {
   public:
     Reader() :
       filename_(""),
       columns_(0),
-      ready_(false),
       current_dialect_("excel"),
-      thread_started_(false) {
+      reading_thread_started_(false),
+      processing_thread_started_(false),
+      row_iterator_index_(0),
+      expected_number_of_rows_(0),
+      ignore_columns_enabled(false) {
 
       std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
       unix_dialect
@@ -76,16 +87,60 @@ namespace csv {
     }
 
     ~Reader() {
-      if (thread_started_) thread_.join();
+      if (reading_thread_started_) reading_thread_.join();
+      if (processing_thread_started_) processing_thread_.join();
     }
 
-    bool read(const std::string& filename) {
+    bool busy() {
+      return !done();
+    }
+
+    bool done() {
+      if (processing_thread_started_) {
+        size_mutex_.lock();
+        bool result = (row_iterator_index_ == expected_number_of_rows_);
+        size_mutex_.unlock();
+        return result;
+      }
+      else return false;
+    }
+
+    bool ready() {
+      size_t rows = 0;
+      number_of_rows_processed_.try_dequeue(rows);
+      std::lock_guard<std::mutex> lock(size_mutex_);
+      bool result = (row_iterator_index_ < expected_number_of_rows_
+        && row_iterator_index_ < rows);
+      return result;
+    }
+
+    robin_map<std::string, std::string> next_row() {
+      size_mutex_.lock();
+      row_iterator_index_ += 1;
+      size_mutex_.unlock();
+      robin_map<std::string, std::string> result;
+      rows_.try_dequeue(result);
+      return result;
+    }
+
+    void read(const std::string& filename) {
       filename_ = filename;
-      read_internal();
-      done();
-      std::unique_lock<std::mutex> lock(ready_mutex_);
-      while (!ready_) ready_cv_.wait(lock);
-      return true;
+      stream_ = std::ifstream(filename_);
+      // new lines will be skipped unless we stop it from happening:    
+      stream_.unsetf(std::ios_base::skipws);
+      std::string line;
+      while (std::getline(stream_, line))
+        ++expected_number_of_rows_;
+
+      if (dialects_[current_dialect_]->header_)
+        expected_number_of_rows_ -= 1;
+
+      stream_.clear();
+      stream_.seekg(0, std::ios::beg);
+
+      reading_thread_started_ = true;
+      reading_thread_ = std::thread(&Reader::read_internal, this);
+      return;
     }
 
     Dialect& configure_dialect(const std::string& dialect_name) {
@@ -118,19 +173,18 @@ namespace csv {
       }
     }
 
-    std::vector<std::unordered_map<std::string, std::string>> rows() {
-      return rows_;
+    std::vector<robin_map<std::string, std::string>> rows() {
+      std::vector<robin_map<std::string, std::string>> rows;
+      while (!done()) {
+        if (ready()) {
+          rows.push_back(next_row());
+        }
+      }
+      return rows;
     }
 
     std::vector<std::string> cols() {
       return headers_;
-    }
-
-    std::vector<std::unordered_map<std::string, std::string>>
-      filter(std::function<bool(std::unordered_map<std::string, std::string>)> filter_function) {
-      std::vector<std::unordered_map<std::string, std::string>> result;
-      std::copy_if(rows_.begin(), rows_.end(), std::back_inserter(result), filter_function);
-      return result;
     }
 
   private:
@@ -138,28 +192,18 @@ namespace csv {
       return values_.try_dequeue(value);
     }
 
-    void done() {
-      done_promise_.set_value(true);
-    }
-
     void read_internal() {
-      std::fstream stream(filename_, std::fstream::in);
-      stream.flags(stream.flags() & ~std::ios_base::skipws);
-      if (!stream.is_open()) {
-        throw std::runtime_error("error: Failed to open " + filename_);
-      }
-
       std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
       if (!dialect) {
         throw std::runtime_error("error: Dialect " + current_dialect_ + " not found");
       }
 
       // Get current position
-      std::streamoff length = stream.tellg();
+      std::streamoff length = stream_.tellg();
 
       // Get first line and find headers by splitting on delimiters
       std::string first_line;
-      getline(stream, first_line);
+      getline(stream_, first_line);
 
       // Under Linux, getline removes \n from the input stream. 
       // However, it does not remove the \r
@@ -167,7 +211,7 @@ namespace csv {
       if (first_line.size() > 0 && first_line[first_line.size() - 1] == '\r') {
         first_line.pop_back();
       }
-      
+
       auto first_line_split = split(first_line, dialect);
       if (dialect->header_) {
         headers_ = first_line_split;
@@ -177,48 +221,64 @@ namespace csv {
         for (size_t i = 0; i < first_line_split.size(); i++)
           headers_.push_back(std::to_string(i));
         // return to start before getline()
-        stream.seekg(length, std::ios_base::beg);
+        stream_.seekg(length, std::ios_base::beg);
       }
 
-      // Start processing thread
-      done_future_ = done_promise_.get_future();
-      thread_ = std::thread(&Reader::process_values, this, &done_future_);
-      thread_started_ = true;
+      columns_ = headers_.size();
 
+      for (auto& header : headers_)
+        current_row_[header] = "";
+      for (auto&[key, value] : dialects_[current_dialect_]->ignore_columns_)
+        current_row_.erase(key);
+
+      if (dialects_[current_dialect_]->ignore_columns_.size() > 0)
+        ignore_columns_enabled = true;
+
+      // Start processing thread
+      processing_thread_ = std::thread(&Reader::process_values, this);
+      processing_mutex_.lock();
+      processing_thread_started_ = true;
+      processing_mutex_.unlock();
+
+      // Get lines one at a time, split on the delimiter and 
+      // enqueue the split results into the values_ queue
       std::string row;
-      while (std::getline(stream, row)) {
+      while (std::getline(stream_, row)) {
         if (row.size() > 0 && row[row.size() - 1] == '\r')
           row.pop_back();
         auto row_split = split(row, dialect);
         for (auto& value : row_split)
           values_.enqueue(value);
       }
+      stream_.close();
     }
 
-    void process_values(std::future<bool> * future_object) {
+    void process_values() {
       size_t index = 0;
       size_t cols = headers_.size();
-      std::unordered_map<std::string, std::string> row;
       std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
+      auto ignore_columns = dialect->ignore_columns_;
+      std::string value;
+      size_t i;
+      std::string column_name;
+      size_t number_of_rows = 0, expected_number_of_rows = 0;
+      size_mutex_.lock();
+      expected_number_of_rows = expected_number_of_rows_;
+      size_mutex_.unlock();
       while (true) {
-        std::string value;
+        if (number_of_rows == expected_number_of_rows)
+          break;
         if (front(value)) {
-          size_t i = index % cols;
-          auto column_name = headers_[i];
-          row[column_name] = value;
+          i = index % cols;
+          column_name = headers_[i];
+          if (!ignore_columns_enabled && ignore_columns.count(column_name) == 0)
+            current_row_[column_name] = value;
           index += 1;
           if (index != 0 && index % cols == 0) {
-            for (auto&[key, value] : dialect->ignore_columns_)
-              row.erase(key);
-            rows_.push_back(row);
+            rows_.enqueue(current_row_);
+            number_of_rows += 1;
+            number_of_rows_processed_.enqueue(number_of_rows);
           }
-        }
-        const auto future_status = future_object->wait_for(std::chrono::seconds(0));
-        if (future_status == std::future_status::ready && values_.size_approx() == 0) {
-          std::unique_lock<std::mutex> lock(ready_mutex_);
-          ready_ = true;
-          ready_cv_.notify_all();
-          break;
         }
       }
     }
@@ -231,7 +291,7 @@ namespace csv {
         return !(std::find(dialect->trim_characters_.begin(), dialect->trim_characters_.end(), ch)
           != dialect->trim_characters_.end());
       }));
-      return result;
+      return std::move(result);
     }
 
     // trim white spaces from right end of an input string
@@ -242,7 +302,7 @@ namespace csv {
         return !(std::find(dialect->trim_characters_.begin(), dialect->trim_characters_.end(), ch)
           != dialect->trim_characters_.end());
       }).base(), result.end());
-      return result;
+      return std::move(result);
     }
 
     // trim white spaces from either end of an input string
@@ -257,14 +317,14 @@ namespace csv {
     // supports multi-character delimiter
     // returns a vector of substrings after split
     std::vector<std::string> split(const std::string& input_string, std::shared_ptr<Dialect> dialect) {
-      
-      std::shared_ptr<std::vector<std::string>> result = std::make_shared<std::vector<std::string>>();
+
+      std::vector<std::string> result;
       std::string sub_result = "";
       bool discard_delimiter = false;
       size_t quotes_encountered = 0;
-      
+
       for (size_t i = 0; i < input_string.size(); ++i) {
-                
+
         // Check if ch is the start of a delimiter sequence
         bool delimiter_detected = false;
         for (size_t j = 0; j < dialect->delimiter_.size(); ++j) {
@@ -281,7 +341,7 @@ namespace csv {
                 // Reached end of delimiter sequence without breaking
                 // delimiter detected!
                 delimiter_detected = true;
-                result->push_back(trim(sub_result));
+                result.push_back(trim(sub_result));
                 sub_result = "";
 
                 // If enabled, skip initial space right after delimiter
@@ -320,25 +380,39 @@ namespace csv {
       }
 
       if (sub_result != "")
-        result->push_back(trim(sub_result));
+        result.push_back(trim(sub_result));
 
-      return *result;
+      return std::move(result);
     }
 
     std::string filename_;
-    size_t columns_;
+    std::ifstream stream_;
     std::vector<std::string> headers_;
-    std::vector<std::unordered_map<std::string, std::string>> rows_;
-    bool ready_;
-    std::condition_variable ready_cv_;
-    std::mutex ready_mutex_;
-    std::thread thread_;
-    bool thread_started_;
-    std::promise<bool> done_promise_;
-    std::future<bool> done_future_;
+    robin_map<std::string, std::string> current_row_;
+    moodycamel::ConcurrentQueue<robin_map<std::string, std::string>> rows_;
+    moodycamel::ConcurrentQueue<size_t> number_of_rows_processed_;
+
+    std::mutex processing_mutex_;
+
+    // Member variables to keep track of rows/cols
+    size_t columns_;
+    size_t expected_number_of_rows_;
+    std::mutex entries_mutex_;
+
+    // Member variables to enable streaming
+    size_t row_iterator_index_;
+    std::mutex size_mutex_;
+
+    std::thread reading_thread_;
+    bool reading_thread_started_;
+
+    std::thread processing_thread_;
+    bool processing_thread_started_;
+
     moodycamel::ConcurrentQueue<std::string> values_;
     std::string current_dialect_;
-    std::unordered_map<std::string, std::shared_ptr<Dialect>> dialects_;
+    robin_map<std::string, std::shared_ptr<Dialect>> dialects_;
+    bool ignore_columns_enabled;
   };
 
 }
