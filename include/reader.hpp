@@ -33,6 +33,7 @@ SOFTWARE.
 #include <dialect.hpp>
 #include <concurrent_queue.hpp>
 #include <robin_map.hpp>
+#include <mio.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -132,21 +133,28 @@ namespace csv {
         throw std::runtime_error("error: Failed to open " + filename_);
       }
 
-      // new lines will be skipped unless we stop it from happening:    
-      stream_.unsetf(std::ios_base::skipws);
-      std::string line;
-      while (std::getline(stream_, line)) {
-        if (line.size() > 0 && line[line.size() - 1] == '\r')
-          line.pop_back();
-        if (line != "" || (!dialects_[current_dialect_]->skip_empty_rows_ && line == ""))
-          ++expected_number_of_rows_;
+      if (stream_.peek() != std::ifstream::traits_type::eof()) {
+        // Memory mapped IO
+        // Count number of lines in file as fast as possible
+        mio::mmap_source mmap(filename_);
+        auto current = mmap.data();
+        auto last = mmap.end();
+        auto last_slash_n = current;
+        while (current && current != last) {
+          if ((current = static_cast<const char*>(memchr(current, '\n', last - current)))) {
+            last_slash_n = current;
+            expected_number_of_rows_ += 1;
+            current += 1;
+          }
+        }
+        auto end = mmap.end();
+        if (last_slash_n != last && last_slash_n + 1 != last)
+          expected_number_of_rows_++;
+        mmap.unmap();
       }
 
       if (dialects_[current_dialect_]->header_ && expected_number_of_rows_ > 0)
         expected_number_of_rows_ -= 1;
-
-      stream_.clear();
-      stream_.seekg(0, std::ios::beg);
 
       reading_thread_started_ = true;
       reading_thread_ = std::thread(&Reader::read_internal, this);
@@ -258,16 +266,13 @@ namespace csv {
 
       // Get lines one at a time, split on the delimiter and 
       // enqueue the split results into the values_ queue
-      bool skip_empty_rows = dialect->skip_empty_rows_;
       std::string row;
       while (std::getline(stream_, row)) {
         if (row.size() > 0 && row[row.size() - 1] == '\r')
           row.pop_back();
-        if (row != "" || (!skip_empty_rows && row == "")) {
           auto row_split = split(row, dialect);
           for (auto& value : row_split)
             values_.enqueue(values_ptoken_, value);
-        }
       }
       stream_.close();
     }
