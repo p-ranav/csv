@@ -83,7 +83,8 @@ csv.configure_dialect("my fancy dialect")
   .skip_initial_space(false)
   .trim_characters(' ', '\t')    // parameter packed
   .ignore_columns("foo", "bar")  // parameter packed
-  .header(true);
+  .header(true)
+  .skip_empty_rows(true);
 
 csv.read("foo.csv");
 for (auto& row : csv.rows()) {
