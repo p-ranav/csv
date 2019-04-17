@@ -403,6 +403,12 @@ namespace csv {
       if (sub_result != "")
         result.push_back(trim(sub_result));
 
+      if (result.size() < columns_) {
+        for (size_t i = result.size(); i < columns_; i++) {
+          result.push_back("");
+        }
+      }
+
       return std::move(result);
     }
 

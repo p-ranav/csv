@@ -431,3 +431,30 @@ TEST_CASE("Parse CSV with missing columns", "[simple csv]") {
   REQUIRE(rows[1][""] == "");
   REQUIRE(rows[1]["d"] == "8");
 }
+
+TEST_CASE("Parse CSV with missing columns II", "[simple csv]") {
+  csv::Reader csv;
+  csv.configure_dialect()
+    .delimiter(";");
+  csv.read("inputs/missing_columns_2.csv");
+  auto rows = csv.rows();
+  REQUIRE(rows.size() == 6);
+  REQUIRE(rows[0]["a"] == "1");
+  REQUIRE(rows[0]["b"] == "2");
+  REQUIRE(rows[0]["c"] == "3");
+  REQUIRE(rows[1]["a"] == "1");
+  REQUIRE(rows[1]["b"] == "2");
+  REQUIRE(rows[1]["c"] == "");
+  REQUIRE(rows[2]["a"] == "1");
+  REQUIRE(rows[2]["b"] == "2");
+  REQUIRE(rows[2]["c"] == "");
+  REQUIRE(rows[3]["a"] == "1");
+  REQUIRE(rows[3]["b"] == "");
+  REQUIRE(rows[3]["c"] == "");
+  REQUIRE(rows[4]["a"] == "1");
+  REQUIRE(rows[4]["b"] == "");
+  REQUIRE(rows[4]["c"] == "");
+  REQUIRE(rows[5]["a"] == "1");
+  REQUIRE(rows[5]["b"] == "");
+  REQUIRE(rows[5]["c"] == "");
+}
