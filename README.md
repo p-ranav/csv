@@ -14,7 +14,7 @@
 Simply include reader.hpp and you're good to go.
 
 ```cpp
-#include <csv/reader.hpp>
+#include <reader.hpp>
 ```
 To start parsing CSV files, create a ```csv::Reader``` object and call  ```.read(filename)```. 
 
@@ -23,7 +23,7 @@ csv::Reader foo;
 foo.read("test.csv");
 ```
 
-This ```.read``` method is non-blocking. The library spawns multiple threads to tokenize the file stream and build a "list of dictionaries". While the reader is doing it's thing, you can start post-processing the rows it has parsed so far. 
+This ```.read``` method is non-blocking. The reader spawns multiple threads to tokenize the file stream and build a "list of dictionaries". While the reader is doing it's thing, you can start post-processing the rows it has parsed so far. 
 
 ```cpp
 while(foo.busy()) {
@@ -40,7 +40,7 @@ If instead you'd like to wait for all the rows to get processed, you can call ``
 
 ```cpp
 auto rows = foo.rows();           // blocks until the CSV is fully processed
-for (auto& row : csv.rows()) {    // Example: [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
+for (auto& row : rows) {          // Example: [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
   auto foo = row["foo"];
   // do something
 }
