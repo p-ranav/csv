@@ -19,7 +19,6 @@
   - [No Header?](#no-header)
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
   - [Performance Benchmarks](#performance-benchmarks)
-* [Supported Compilers](#supported-compilers)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -262,11 +261,6 @@ and here are the results:
 | [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 237 | 46 | 0.0265 s |
 | [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 761,817 | 3 | 0.677 s |
 | [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 1,000,000 | 12 | 3.21 s |
-
-## Supported Compilers
-* GCC >= 7.0.0
-* Clang >= 4.0
-* MSVC >= 2017
 
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
