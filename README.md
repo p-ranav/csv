@@ -6,6 +6,7 @@
 * Fast, asynchronous, multi-threaded processing using:
   - [Lock-free Concurrent Queues](https://github.com/cameron314/concurrentqueue)
   - [Robin hood Hashing](https://github.com/Tessil/robin-map)
+  - [Memory-mapped File I/O](https://github.com/mandreyel/mio)
 * Requires C++11
 * MIT License
 
@@ -17,7 +18,6 @@
   - [Multi-character Delimiters](#multi-character-delimiters)
   - [Ignoring Columns](#ignoring-columns)
   - [No Header?](#no-header)
-  - [Dealing with Empty Rows](#dealing-with-empty-rows)
   - [Performance Benchmarks](#performance-benchmarks)
 * [Contributing](#contributing)
 * [License](#license)
@@ -82,8 +82,7 @@ csv.configure_dialect("my fancy dialect")
   .skip_initial_space(false)
   .trim_characters(' ', '\t')    // parameter packed
   .ignore_columns("foo", "bar")  // parameter packed
-  .header(true)
-  .skip_empty_rows(true);
+  .header(true);
 
 csv.read("foo.csv");
 for (auto& row : csv.rows()) {
@@ -101,9 +100,6 @@ for (auto& row : csv.rows()) {
 | ignore_columns | ```std::vector<std::string>``` | specifies the list of columns to ignore. These columns will be stripped during the parsing process. Default = ```{}``` - no column ignored |
 | header | ```bool``` | indicates whether the file includes a header row. If true the first row in the file is a header row, not data. Default = ```true``` |
 | column_names | ```std::vector<std::string>``` | specifies the list of column names. This is useful when the first row of the CSV isn't a header Default = ```{}``` |
-| skip_empty_rows | ```bool``` | specifies how empty rows should be interpreted. If this is set to true, empty rows are skipped. Default = ```false``` |
-
-The line terminator is ```'\n'``` by default. I use std::getline and handle stripping out ```'\r'``` from line endings. So, for now, this is not configurable in custom dialects. 
 
 ## Multi-character Delimiters
 
@@ -197,42 +193,6 @@ If ```.column_names``` is not called, then the reader simply generates dictionar
 
 ```cpp
 [{"0": "9", "1": "52", "2": "1"}, {"0": "52", "1": "91", "2": "0"}, ...]
-```
-
-## Dealing with Empty Rows
-
-Sometimes you have to deal with a CSV file that has empty lines; either in the middle or at the end of the file:
-
-```csv
-a,b,c
-1,2,3
-
-4,5,6
-
-10,11,12
-
-
-
-```
-
-Here's how this get's parsed by default:
-
-```cpp
-csv::Reader csv;
-csv.read("inputs/empty_lines.csv");
-auto rows = csv.rows();
-// [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", ...}]
-```
-
-If you don't care for these empty rows, simply call ```.skip_empty_rows(true)```
-
-```cpp
-csv::Reader csv;
-csv.configure_dialect()
-  .skip_empty_rows(true);
-csv.read("inputs/empty_lines.csv");
-auto rows = csv.rows();
-// [{"a": 1, "b": 2, "c": 3}, {"a": "4", "b": "5", "c": "6"}, {"a": "10", "b": "11", "c": "12"}]
 ```
 
 ## Performance Benchmarks
