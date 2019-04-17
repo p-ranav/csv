@@ -89,7 +89,7 @@ for (auto& row : csv.rows()) {
 
 The line terminator is ```'\n'``` by default. I use std::getline and handle stripping out ```'\r'``` from line endings. So, for now, this is not configurable in custom dialects. 
 
-## Trimming Characters
+## Multi-character Delimiters
 
 Consider this strange, messed up log file: 
 
@@ -99,7 +99,7 @@ Consider this strange, messed up log file:
 02        :: DEBUG :: Warning! Foo has happened                :: 1555463132
 ```
 
-To parse this file, configure a new dialect that splits on "::" and trims whitespace, braces, and bracket characters.
+To parse this file, simply configure a new dialect that splits on "::" and trims whitespace, braces, and bracket characters.
 
 ```cpp
 csv::reader csv;
