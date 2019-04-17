@@ -40,7 +40,7 @@ If instead you'd like to wait for all the rows to get processed, you can call ``
 
 ```cpp
 auto rows = foo.rows();           // blocks until the CSV is fully processed
-for (auto& row : csv.rows()) {    // Example: [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
+for (auto& row : rows) {          // Example: [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
   auto foo = row["foo"];
   // do something
 }
