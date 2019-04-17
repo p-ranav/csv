@@ -236,6 +236,9 @@ auto rows = csv.rows();
 
 ## Performance Benchmarks
 
+| Dataset | Rows | Cols | Number of Runs | Average-case Execution Time |
+|---------------------------------------------------------------------------------------|-----------|------|----------------|-----------------------------|
+| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 1,000,000 | 12 | 20 | 3.21 s |
 
 ## Supported Compilers
 * GCC >= 7.0.0
