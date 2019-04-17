@@ -4,6 +4,8 @@
 
 * Header-only library
 * Fast, asynchronous, multi-threaded processing
+  - [Lock-free Concurrent Queue](https://github.com/cameron314/concurrentqueue)
+  - [Robin hood Hashing](https://github.com/Tessil/robin-map)
 * Requires C++11
 * BSD 2-Clause "Simplified" License
 
