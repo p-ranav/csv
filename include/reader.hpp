@@ -24,9 +24,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
-#include <csv/dialect.hpp>
-#include <csv/concurrent_queue.hpp>
-#include <csv/robin_map.hpp>
+#include <dialect.hpp>
+#include <concurrent_queue.hpp>
+#include <robin_map.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>

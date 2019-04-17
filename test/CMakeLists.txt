@@ -15,7 +15,7 @@ endif()
 file(GLOB CSV_TEST_SOURCES
     "*.cpp"
     "*.hpp"
-    "../include/csv/*.hpp"
+    "../include/*.hpp"
     "inputs/*.csv"
 )
 

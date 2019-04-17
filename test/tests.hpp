@@ -1,6 +1,6 @@
 #pragma once
 #include <catch.hpp>
-#include <csv/reader.hpp>
+#include <reader.hpp>
 
 TEST_CASE("Parse an empty CSV", "[simple csv]") {
   csv::Reader csv;

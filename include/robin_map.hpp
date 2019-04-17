@@ -31,7 +31,7 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
-#include <csv/robin_hash.hpp>
+#include <robin_hash.hpp>
 
 namespace csv {
 

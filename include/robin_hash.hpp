@@ -39,7 +39,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <csv/robin_growth_policy.hpp>
+#include <robin_growth_policy.hpp>
 
 
 namespace csv {
