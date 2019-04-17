@@ -144,57 +144,6 @@ if (csv.read("test.csv")) {
 }  
 ```
 
-### Filtering Rows
-
-Once parsed, you can filter the CSV and obtain a list of rows that meet some condition using ```.filter(...)```
-
-```csv
-first_name, last_name, grade
-Alex, Brian, A
-Tom, Smith, F
-John, Doe, B
-Jane, Dee, F,
-Tony, Hawk, A,
-```
-
-Let's say you want a shortlist of all students who received an 'F' grade. 
-
-```cpp
-csv::reader csv;
-csv.configure_dialect("student records")
-  .skip_initial_space(true);
-
-if (csv.read("test.csv")) {
-  auto rows = csv.filter([](auto rows) {
-    return rows["grade"] == "F";
-  });
-  // Your rows are:
-  // [{"first_name": "Tom", "last_name": "Smith", "grade": "F"},
-  //  {"first_name": "Jane", "last_name": "Doe", "grade": "F"}]
-}  
-```
-
-NOTE: Filtering does not mutate the original list of rows. ```csv.rows()``` will still return all the original rows. This call simply returns a copy with the filtered results. 
-
-- [Asyncrhonous CSV Reader](#asynchronous-csv-reader)
-  * [Iterator Pattern](#iterator-pattern)
-  
-## Asynchronous Parsing
-
-### Iterator Pattern
-
-```cpp
-csv::AsyncReader reader;
-reader.read("weather.csv");
-
-while(!reader.done()) {
-  if (reader.has_next()) {
-    auto row = reader.next();
-    // do something
-  }
-}
-```
-
 ## Supported Compilers
 * GCC >= 7.0.0
 * Clang >= 4.0
