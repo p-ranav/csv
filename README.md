@@ -209,7 +209,7 @@ auto rows = csv.rows();
 // [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", "b": "", "c": ""}, ...]
 ```
 
-If you don't care for those empty rows, simply call ```.skip_empty_rows(true)```
+If you don't care for these empty rows, simply call ```.skip_empty_rows(true)```
 
 ```cpp
 csv::Reader csv;
