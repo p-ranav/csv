@@ -237,7 +237,9 @@ auto rows = csv.rows();
 
 ## Performance Benchmarks
 
-I've run some performance tests on my Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz | 16GB RAM). Here's the code for benchmarking:
+I've run some performance tests on my Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz | 16GB RAM). 
+
+Here's the function being measured:
 
 ```cpp
 void parse(const std::string& filename) {
