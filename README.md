@@ -1,4 +1,4 @@
-# CSV Parser for Modern C++
+# Fast CSV Parser for Modern C++
 
 ## Highlights
 
