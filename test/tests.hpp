@@ -415,3 +415,19 @@ TEST_CASE("Parse CSV with empty lines - skip empty rows", "[simple csv]") {
   REQUIRE(rows[3]["b"] == "11");
   REQUIRE(rows[3]["c"] == "12");
 }
+
+TEST_CASE("Parse CSV with missing columns", "[simple csv]") {
+  csv::Reader csv;
+
+  csv.read("inputs/missing_columns.csv");
+  auto rows = csv.rows();
+  REQUIRE(rows.size() == 2);
+  REQUIRE(rows[0]["a"] == "1");
+  REQUIRE(rows[0]["b"] == "2");
+  REQUIRE(rows[0][""] == "");
+  REQUIRE(rows[0]["d"] == "4");
+  REQUIRE(rows[1]["a"] == "5");
+  REQUIRE(rows[1]["b"] == "6");
+  REQUIRE(rows[1][""] == "");
+  REQUIRE(rows[1]["d"] == "8");
+}
