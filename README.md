@@ -18,6 +18,7 @@
   - [Ignoring Columns](#ignoring-columns)
   - [No Header?](#no-header)
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
+* [Performance Benchmarks](#performance-benchmarks)
 * [Supported Compilers](#supported-compilers)
 * [Contributing](#contributing)
 * [License](#license)
