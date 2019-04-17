@@ -177,7 +177,7 @@ The CSV rows will now look like this:
 [{"foo": "9", "bar": "52", "baz": "1"}, {"foo": "52", "bar": "91", "baz": "0"}, ...]
 ```
 
-If you remember to set ```.header``` but forget to provide a list of column names, then your CSV rows will look like this:
+If ```.column_names``` is not called, then the reader simply generates dictionary keys like so:
 
 ```cpp
 [{"0": "9", "1": "52", "2": "1"}, {"0": "52", "1": "91", "2": "0"}, ...]
