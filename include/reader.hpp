@@ -197,6 +197,10 @@ namespace csv {
       return headers_;
     }
 
+    std::pair<size_t, size_t> shape() {
+      return { expected_number_of_rows_, columns_ };
+    }
+
   private:
     bool front(std::string& value) {
       return values_.try_dequeue(values_ctoken_, value);
