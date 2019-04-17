@@ -14,7 +14,7 @@
 Simply include reader.hpp and you're good to go.
 
 ```cpp
-#include <csv/reader.hpp>
+#include <reader.hpp>
 ```
 To start parsing CSV files, create a ```csv::Reader``` object and call  ```.read(filename)```. 
 
