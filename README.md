@@ -145,7 +145,7 @@ auto rows = csv.rows();
 
 ### No header?
 
-Sometimes you have CSV files with no header row, example:
+Sometimes you have CSV files with no header row:
 
 ```csv
 9 52 1
