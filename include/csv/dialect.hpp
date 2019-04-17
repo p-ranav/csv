@@ -38,6 +38,7 @@ namespace csv {
     bool double_quote_;
     robin_map<std::string, bool> ignore_columns_;
     std::vector<char> trim_characters_;
+    std::vector<std::string> column_names_;
     bool header_;
 
     Dialect() :
@@ -94,6 +95,20 @@ namespace csv {
     Dialect& ignore_columns(T column, Targs... Fargs) {
       ignore_columns_[column] = true;
       ignore_columns(Fargs...);
+      return *this;
+    }
+
+    // Base case for ignore_columns parameter packing
+    Dialect& column_names() {
+      return *this;
+    }
+
+    // Parameter packed trim_characters method
+    // Accepts a variadic number of columns
+    template<typename T, typename... Targs>
+    Dialect& column_names(T column, Targs... Fargs) {
+      column_names_.push_back(column);
+      column_names(Fargs...);
       return *this;
     }
 

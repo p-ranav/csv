@@ -218,8 +218,13 @@ namespace csv {
       }
       else {
         headers_.clear();
-        for (size_t i = 0; i < first_line_split.size(); i++)
-          headers_.push_back(std::to_string(i));
+        if (dialect->column_names_.size() > 0) {
+          headers_ = dialect->column_names_;
+        }
+        else {
+          for (size_t i = 0; i < first_line_split.size(); i++)
+            headers_.push_back(std::to_string(i));
+        }
         // return to start before getline()
         stream_.seekg(length, std::ios_base::beg);
       }

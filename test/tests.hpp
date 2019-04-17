@@ -173,6 +173,26 @@ TEST_CASE("Parse the most basic of CSV buffers - No header row", "[simple csv]")
   REQUIRE(rows[2]["2"] == "9");
 }
 
+TEST_CASE("Parse the most basic of CSV buffers - No header / custom column names", "[simple csv]") {
+  csv::Reader csv;
+
+  csv.configure_dialect("test_dialect")
+    .header(false)
+    .column_names("a", "b", "c");
+  csv.read("inputs/test_08.csv");
+  auto rows = csv.rows();
+  REQUIRE(rows.size() == 3);
+  REQUIRE(rows[0]["a"] == "1");
+  REQUIRE(rows[0]["b"] == "2");
+  REQUIRE(rows[0]["c"] == "3");
+  REQUIRE(rows[1]["a"] == "4");
+  REQUIRE(rows[1]["b"] == "5");
+  REQUIRE(rows[1]["c"] == "6");
+  REQUIRE(rows[2]["a"] == "7");
+  REQUIRE(rows[2]["b"] == "8");
+  REQUIRE(rows[2]["c"] == "9");
+}
+
 TEST_CASE("Parse the most basic of CSV buffers - Space delimiter", "[simple csv]") {
   csv::Reader csv;
 
