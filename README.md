@@ -238,7 +238,24 @@ auto rows = csv.rows();
 
 ## Performance Benchmarks
 
-I've run some performance tests on my Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz) with 16 GB RAM
+I've run some performance tests on my Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz | 16GB RAM). Here's the code for benchmarking:
+
+```cpp
+def parse(const std::string& filename) {
+  csv::Reader foo;
+  foo.read(filename);
+  std::vector<csv::robin_map<std::string, std::string>> rows;
+  while (foo.busy()) {
+    if (foo.ready()) {
+      auto row = foo.next_row();
+      rows.push_back(row);
+    }
+  }
+  std::cout << "Num rows: " << rows.size() << std::endl;
+}
+```
+
+and here are the results:
 
 | Dataset | Rows | Cols | Average-case Execution Time |
 |---------------------------------------------------------------------------------------|-----------|------|-----------------------------|
