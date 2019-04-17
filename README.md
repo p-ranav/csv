@@ -109,9 +109,9 @@ csv.configure_dialect("my strange dialect")
 
 csv.read("test.csv");
 for (auto& row : csv.rows()) {
-  auto thread_id = row["Thread ID"];
-  auto log_level = row["Log Level"];
-  auto message = row["Log Message"];
+  auto thread_id = row["Thread ID"];    // "04"
+  auto log_level = row["Log Level"];    // "INFO"
+  auto message = row["Log Message"];    // "Hello World"
   // do something
 }
 ```
