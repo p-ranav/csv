@@ -222,7 +222,7 @@ Here's how this get's parsed by default:
 csv::Reader csv;
 csv.read("inputs/empty_lines.csv");
 auto rows = csv.rows();
-// [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", "b": "", "c": ""}, ...]
+// [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", ...]
 ```
 
 If you don't care for these empty rows, simply call ```.skip_empty_rows(true)```
