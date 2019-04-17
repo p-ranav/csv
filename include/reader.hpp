@@ -316,8 +316,13 @@ namespace csv {
     // supports multi-character delimiter
     // returns a vector of substrings after split
     std::vector<std::string> split(const std::string& input_string, std::shared_ptr<Dialect> dialect) {
-
       std::vector<std::string> result;
+      if (input_string == "") {
+        for (size_t i = 0; i < columns_; i++) {
+          result.push_back("");
+        }
+      }
+
       std::string sub_result = "";
       bool discard_delimiter = false;
       size_t quotes_encountered = 0;
