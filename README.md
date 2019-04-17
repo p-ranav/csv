@@ -11,7 +11,7 @@
 
 ## Table of Contents
 
-* [Reading CSV files](#quick-start)
+* [Reading CSV files](#reading-csv-files)
   - [Dialects](#dialects)
      - [Configuring Custom Dialects](#configuring-custom-dialects)
   - [Multi-character Delimiters](#multi-character-delimiters)
@@ -23,7 +23,7 @@
 * [Contributing](#contributing)
 * [License](#license)
 
-## Quick Start
+## Reading CSV files
 
 Simply include reader.hpp and you're good to go.
 
