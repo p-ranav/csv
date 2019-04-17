@@ -143,6 +143,19 @@ auto rows = csv.rows();
 //  {"name": "Jane Barkley", "email": "jane.barkley@gmail.com", "department": "MGT"}]
 ```
 
+## No Header?
+
+Sometimes you have CSV files with no header row. You can configure this like so:
+
+* Set ```.header``` to false
+* Provide a list of column names with ```.column_names(...)```
+
+```cpp
+csv.configure_dialect("no headers")
+  .header(false)
+  .column_names("foo", "bar", "baz");
+```
+
 ## Supported Compilers
 * GCC >= 7.0.0
 * Clang >= 4.0
