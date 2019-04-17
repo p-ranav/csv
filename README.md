@@ -183,6 +183,31 @@ If ```.column_names``` is not called, then the reader simply generates dictionar
 [{"0": "9", "1": "52", "2": "1"}, {"0": "52", "1": "91", "2": "0"}, ...]
 ```
 
+## Dealing with Empty Lines
+
+Sometimes you have to deal with a CSV file that has empty lines; either in the middle or at the end of the file:
+
+```csv
+a,b,c
+1,2,3
+
+4,5,6
+
+10,11,12
+
+
+
+```
+
+Here's how this get's parsed:
+
+```cpp
+csv::Reader csv;
+csv.read("inputs/empty_lines.csv");
+auto rows = csv.rows();
+// [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", "b": "", "c": ""}, ...]
+```
+
 ## Supported Compilers
 * GCC >= 7.0.0
 * Clang >= 4.0
