@@ -135,8 +135,12 @@ namespace csv {
       // new lines will be skipped unless we stop it from happening:    
       stream_.unsetf(std::ios_base::skipws);
       std::string line;
-      while (std::getline(stream_, line))
-        ++expected_number_of_rows_;
+      while (std::getline(stream_, line)) {
+        if (line.size() > 0 && line[line.size() - 1] == '\r')
+          line.pop_back();
+        if (line != "" || (!dialects_[current_dialect_]->skip_empty_rows_ && line == ""))
+          ++expected_number_of_rows_;
+      }
 
       if (dialects_[current_dialect_]->header_ && expected_number_of_rows_ > 0)
         expected_number_of_rows_ -= 1;
@@ -149,7 +153,7 @@ namespace csv {
       return;
     }
 
-    Dialect& configure_dialect(const std::string& dialect_name) {
+    Dialect& configure_dialect(const std::string& dialect_name = "excel") {
       if (dialects_.find(dialect_name) != dialects_.end()) {
         return *dialects_[dialect_name];
       }
@@ -250,13 +254,16 @@ namespace csv {
 
       // Get lines one at a time, split on the delimiter and 
       // enqueue the split results into the values_ queue
+      bool skip_empty_rows = dialect->skip_empty_rows_;
       std::string row;
       while (std::getline(stream_, row)) {
         if (row.size() > 0 && row[row.size() - 1] == '\r')
           row.pop_back();
-        auto row_split = split(row, dialect);
-        for (auto& value : row_split)
-          values_.enqueue(values_ptoken_, value);
+        if (row != "" || (!skip_empty_rows && row == "")) {
+          auto row_split = split(row, dialect);
+          for (auto& value : row_split)
+            values_.enqueue(values_ptoken_, value);
+        }
       }
       stream_.close();
     }

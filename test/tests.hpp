@@ -366,7 +366,7 @@ TEST_CASE("Parse the most basic of CSV buffers and ignore age/gender columns", "
   REQUIRE(rows[2].count("gender") == 0);
 }
 
-TEST_CASE("Parse CSV with empty lines in the end", "[simple csv]") {
+TEST_CASE("Parse CSV with empty lines", "[simple csv]") {
   csv::Reader csv;
   csv.read("inputs/empty_lines.csv");
   auto rows = csv.rows();
@@ -392,4 +392,26 @@ TEST_CASE("Parse CSV with empty lines in the end", "[simple csv]") {
   REQUIRE(rows[6]["a"] == "");
   REQUIRE(rows[6]["b"] == "");
   REQUIRE(rows[6]["c"] == "");
+}
+
+TEST_CASE("Parse CSV with empty lines - skip empty rows", "[simple csv]") {
+  csv::Reader csv;
+  csv.configure_dialect()
+    .skip_empty_rows(true);
+
+  csv.read("inputs/empty_lines.csv");
+  auto rows = csv.rows();
+  REQUIRE(rows.size() == 4);
+  REQUIRE(rows[0]["a"] == "1");
+  REQUIRE(rows[0]["b"] == "2");
+  REQUIRE(rows[0]["c"] == "3");
+  REQUIRE(rows[1]["a"] == "4");
+  REQUIRE(rows[1]["b"] == "5");
+  REQUIRE(rows[1]["c"] == "6");
+  REQUIRE(rows[2]["a"] == "7");
+  REQUIRE(rows[2]["b"] == "8");
+  REQUIRE(rows[2]["c"] == "9");
+  REQUIRE(rows[3]["a"] == "10");
+  REQUIRE(rows[3]["b"] == "11");
+  REQUIRE(rows[3]["c"] == "12");
 }
