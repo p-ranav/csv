@@ -23,7 +23,7 @@ csv::Reader foo;
 foo.read("test.csv");
 ```
 
-This ```.read``` method is non-blocking, i.e., you get back control. The library spawns multiple threads for tokenize the file stream and building a "list of dictionaries". While the parser is doing it's thing, you can start post-processing the rows it has parsed so far:
+This ```.read``` method is non-blocking. The library spawns multiple threads to tokenize the file stream and build a "list of dictionaries". While the parser is doing it's thing, you can start post-processing the rows it has parsed so far:
 
 ```cpp
 while(foo.busy()) {
