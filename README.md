@@ -39,8 +39,8 @@ while(foo.busy()) {
 If instead you'd like to wait for all the rows to get processed, you can call ```.rows()``` which is a convenience method that executes the above while loop
 
 ```cpp
-auto rows = foo.rows();           // blocks ill CSV is fully processed
-for (auto& row : csv.rows()) {    // csv.rows() => [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
+auto rows = foo.rows();           // blocks until the CSV is fully processed
+for (auto& row : csv.rows()) {    // Example: [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
   auto foo = row["foo"];
   // do something
 }
