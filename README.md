@@ -9,32 +9,40 @@
 * Requires C++11
 * BSD 2-Clause "Simplified" License
 
-## Table of Contents	## Quick Start
+## Quick Start
 
-- [Synchronous Parsing](#synchronous-parsing)	
-   * [Standard Dialects](#standard-dialects)	
-   * [Configuring Custom Dialects](#configuring-custom-dialects)	
-   * [Trimming Characters](#trimming-characters)	
-   * [Ignoring Columns](#ignoring-columns)	
-   * [Filtering Rows](#filtering-rows)	
-- [Asyncrhonous Parsing](#asynchronous-parsing)
-   * [Iterator Pattern](#iterator-pattern)
-
-## Synchronous Parsing
-
-To parse CSV files, simply include ```<csv/reader.hpp>``` and configure a ```csv::Reader``` like so:
+Simply include reader.hpp and you're good to go.
 
 ```cpp
 #include <csv/reader.hpp>
+```
+To start parsing CSV files, create a ```csv::Reader``` object and call  ```.read(filename)```. 
 
-int main() {
-  csv::Reader csv;
-  if (csv.read("test.csv")) {         // reads a CSV file and builds a list of dictionaries
-    for (auto& row : csv.rows()) {    // csv.rows() => [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
-      auto foo = row["foo"];
-      // do something
-    }
+```cpp
+csv::Reader foo;
+foo.read("test.csv");
+```
+
+This ```.read``` method is non-blocking, i.e., you get back control. The library spawns multiple threads for tokenize the file stream and building a "list of dictionaries". While the parser is doing it's thing, you can start post-processing the rows it has parsed so far:
+
+```cpp
+while(foo.busy()) {
+  if (foo.has_row()) {
+    auto row = foo.next_row();
+    auto foo = row["foo"]
+    auto bar = row["bar"];
+    // do something
   }
+}
+```
+
+If instead you'd like to wait for all the rows to get processed, you can call ```.rows()``` which is a convenience method that executes the above while loop
+
+```cpp
+auto rows = foo.rows();           // blocks ill CSV is fully processed
+for (auto& row : csv.rows()) {    // csv.rows() => [{"foo": "1", "bar": "2"}, {"foo": "3", "bar": "4"}, ...] 
+  auto foo = row["foo"];
+  // do something
 }
 ```
 
