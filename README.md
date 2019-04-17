@@ -238,6 +238,7 @@ auto rows = csv.rows();
 
 | Dataset | Rows | Cols | Number of Runs | Average-case Execution Time |
 |---------------------------------------------------------------------------------------|-----------|------|----------------|-----------------------------|
+| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 237 | 46 | 20 | 0.0265 s |
 | [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 1,000,000 | 12 | 20 | 3.21 s |
 
 ## Supported Compilers
