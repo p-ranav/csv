@@ -236,9 +236,13 @@ auto rows = csv.rows();
 
 ## Performance Benchmarks
 
+I've run some tests on my Surface Pro 4
+
 | Dataset | Rows | Cols | Average-case Execution Time |
 |---------------------------------------------------------------------------------------|-----------|------|-----------------------------|
 | [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 237 | 46 | 0.0265 s |
+| [Single column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 761,817 | 1 | 0.485 s |
+| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 761,817 | 3 | 0.677 s |
 | [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 1,000,000 | 12 | 3.21 s |
 
 ## Supported Compilers
