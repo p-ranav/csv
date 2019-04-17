@@ -408,6 +408,13 @@ namespace csv {
           result.push_back("");
         }
       }
+      else if (result.size() > columns_ && columns_ != 0) {
+        std::vector<std::string> result_sliced;
+        for (size_t i = 0; i < columns_; i++) {
+          result_sliced.push_back(result[i]);
+        }
+        return result_sliced;
+      }
 
       return std::move(result);
     }

@@ -458,3 +458,19 @@ TEST_CASE("Parse CSV with missing columns II", "[simple csv]") {
   REQUIRE(rows[5]["b"] == "");
   REQUIRE(rows[5]["c"] == "");
 }
+
+TEST_CASE("Parse CSV with too many columns", "[simple csv]") {
+  csv::Reader csv;
+  csv.configure_dialect()
+    .delimiter(",")
+    .trim_characters(' ');
+  csv.read("inputs/too_many_columns.csv");
+  auto rows = csv.rows();
+  REQUIRE(rows.size() == 2);
+  REQUIRE(rows[0]["a"] == "1");
+  REQUIRE(rows[0]["b"] == "2");
+  REQUIRE(rows[0]["c"] == "3");
+  REQUIRE(rows[1]["a"] == "6");
+  REQUIRE(rows[1]["b"] == "7");
+  REQUIRE(rows[1]["c"] == "");
+}
