@@ -46,7 +46,7 @@ for (auto& row : csv.rows()) {    // Example: [{"foo": "1", "bar": "2"}, {"foo":
 }
 ```
 
-### Standard Dialects
+## Dialects
 
 This csv library comes with three standard dialects:
 
@@ -89,7 +89,7 @@ for (auto& row : csv.rows()) {
 
 The line terminator is ```'\n'``` by default. I use std::getline and handle stripping out ```'\r'``` from line endings. So, for now, this is not configurable in custom dialects. 
 
-### Trimming Characters
+## Trimming Characters
 
 Consider this strange, messed up log file: 
 
@@ -116,7 +116,7 @@ for (auto& row : csv.rows()) {
 }
 ```
 
-### Ignoring Columns
+## Ignoring Columns
 
 Consider the following CSV. Let's say you don't care about the columns ```age``` and ```gender```. Here, you can use ```.ignore_columns``` and provide a list of columns to ignore. 
 
@@ -143,7 +143,7 @@ auto rows = csv.rows();
 //  {"name": "Jane Barkley", "email": "jane.barkley@gmail.com", "department": "MGT"}]
 ```
 
-### No header?
+## No Header?
 
 Sometimes you have CSV files with no header row:
 
