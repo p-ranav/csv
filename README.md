@@ -86,6 +86,7 @@ for (auto& row : csv.rows()) {
 | trim_characters | ```std::vector<char>``` | specifies the list of characters to trim from every value in the CSV. Default = ```{}``` - nothing trimmed |
 | ignore_columns | ```std::vector<std::string>``` | specifies the list of columns to ignore. These columns will be stripped during the parsing process. Default = ```{}``` - no column ignored |
 | header | ```bool``` | indicates whether the file includes a header row. If true the first row in the file is a header row, not data. Default = ```true``` |
+| column_names | ```std::vector<std::string>``` | specifies the list of column names. This is useful when the first row of the CSV isn't a header Default = ```{}``` |
 
 The line terminator is ```'\n'``` by default. I use std::getline and handle stripping out ```'\r'``` from line endings. So, for now, this is not configurable in custom dialects. 
 
@@ -181,6 +182,31 @@ If ```.column_names``` is not called, then the reader simply generates dictionar
 
 ```cpp
 [{"0": "9", "1": "52", "2": "1"}, {"0": "52", "1": "91", "2": "0"}, ...]
+```
+
+## Dealing with Empty Lines
+
+Sometimes you have to deal with a CSV file that has empty lines; either in the middle or at the end of the file:
+
+```csv
+a,b,c
+1,2,3
+
+4,5,6
+
+10,11,12
+
+
+
+```
+
+Here's how this get's parsed:
+
+```cpp
+csv::Reader csv;
+csv.read("inputs/empty_lines.csv");
+auto rows = csv.rows();
+// [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", "b": "", "c": ""}, ...]
 ```
 
 ## Supported Compilers
