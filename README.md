@@ -7,7 +7,7 @@
   - [Lock-free Concurrent Queues](https://github.com/cameron314/concurrentqueue)
   - [Robin hood Hashing](https://github.com/Tessil/robin-map)
 * Requires C++11
-* BSD 2-Clause "Simplified" License
+* MIT License
 
 ## Table of Contents
 
