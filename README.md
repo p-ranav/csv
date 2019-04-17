@@ -233,6 +233,11 @@ auto rows = csv.rows();
 // [{"a": 1, "b": 2, "c": 3}, {"a": "4", "b": "5", "c": "6"}, {"a": "10", "b": "11", "c": "12"}]
 ```
 
+## Performance Benchmarks
+
+[Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9)
+(1500000, 14) Mean: 5.98465s
+
 ## Supported Compilers
 * GCC >= 7.0.0
 * Clang >= 4.0
