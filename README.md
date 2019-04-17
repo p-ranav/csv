@@ -69,9 +69,10 @@ csv.configure_dialect("my fancy dialect")
   .skip_initial_space(false)
   .trim_characters(' ', '\t')    // parameter packed
   .ignore_columns("foo", "bar")  // parameter packed
-  .header(true)
+  .header(true);
 
-if (csv.read("foo.csv") {
+csv.read("foo.csv");
+for (auto& row : csv.rows()) {
   // do something
 }
 ```
@@ -106,13 +107,12 @@ csv.configure_dialect("my strange dialect")
   .delimiter("::")
   .trim_characters(' ', '[', ']', '{', '}');   
 
-if (csv.read("test.csv")) {
-  for (auto& row : csv.rows()) {
-    auto thread_id = row["Thread ID"];
-    auto log_level = row["Log Level"];
-    auto message = row["Log Message"];
-    // do something
-  }
+csv.read("test.csv");
+for (auto& row : csv.rows()) {
+  auto thread_id = row["Thread ID"];
+  auto log_level = row["Log Level"];
+  auto message = row["Log Message"];
+  // do something
 }
 ```
 
@@ -135,13 +135,12 @@ csv.configure_dialect("ignore meh and fez")
   .delimiter(", ")
   .ignore_columns("age", "gender");
 
-if (csv.read("test.csv")) {
-  auto rows = csv.rows();
-  // Your rows are:
-  // [{"name": "Mark Johnson", "email": "mark.johnson@gmail.com", "department": "BA"},
-  //  {"name": "John Stevenson", "email": "john.stevenson@gmail.com", "department": "IT"},
-  //  {"name": "Jane Barkley", "email": "jane.barkley@gmail.com", "department": "MGT"}]
-}  
+csv.read("test.csv");
+auto rows = csv.rows();
+// Your rows are:
+// [{"name": "Mark Johnson", "email": "mark.johnson@gmail.com", "department": "BA"},
+//  {"name": "John Stevenson", "email": "john.stevenson@gmail.com", "department": "IT"},
+//  {"name": "Jane Barkley", "email": "jane.barkley@gmail.com", "department": "MGT"}]
 ```
 
 ## Supported Compilers
