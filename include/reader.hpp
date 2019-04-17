@@ -45,6 +45,7 @@ SOFTWARE.
 #include <mutex>
 #include <condition_variable>
 #include <iterator>
+#include <cstring>
 
 namespace csv {
 
@@ -264,17 +265,46 @@ namespace csv {
       processing_thread_started_ = true;
       processing_mutex_.unlock();
 
-      // Get lines one at a time, split on the delimiter and 
-      // enqueue the split results into the values_ queue
-      std::string row;
-      while (std::getline(stream_, row)) {
-        if (row.size() > 0 && row[row.size() - 1] == '\r')
-          row.pop_back();
-          auto row_split = split(row, dialect);
+      if (stream_.peek() != std::ifstream::traits_type::eof()) {
+        // Memory mapped IO
+        // Count number of lines in file as fast as possible
+        mio::mmap_source mmap(filename_);
+        auto current = mmap.data();
+        auto last = mmap.end();
+        auto last_slash_n = current;
+        std::string line = "";
+        bool first_row_passed = !dialect->header_;
+        while (current && current != last) {
+          if (current[0] == '\n') {
+            if (!first_row_passed) 
+              first_row_passed = true;
+            else {
+              // End of line reached, save row
+              if (line.size() > 0 && line[line.size() - 1] == '\r')
+                line.pop_back();
+              auto row_split = split(line, dialect);
+              for (auto& value : row_split)
+                values_.enqueue(values_ptoken_, value);
+              line = "";
+            }
+          }
+          else {
+            if (first_row_passed)
+              line += current[0];
+          }
+          current += 1;
+        }
+        if (line != "" && first_row_passed) {
+          // one last row to save
+          if (line.size() > 0 && line[line.size() - 1] == '\r')
+            line.pop_back();
+          auto row_split = split(line, dialect);
           for (auto& value : row_split)
             values_.enqueue(values_ptoken_, value);
+          line = "";
+        }
+        mmap.unmap();
       }
-      stream_.close();
     }
 
     void process_values() {
