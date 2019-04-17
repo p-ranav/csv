@@ -236,7 +236,7 @@ auto rows = csv.rows();
 
 ## Performance Benchmarks
 
-I've run some tests on my Surface Pro 4
+I've run some tests on my Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz) with 16 GB RAM
 
 | Dataset | Rows | Cols | Average-case Execution Time |
 |---------------------------------------------------------------------------------------|-----------|------|-----------------------------|
