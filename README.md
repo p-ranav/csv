@@ -18,7 +18,7 @@
   - [Ignoring Columns](#ignoring-columns)
   - [No Header?](#no-header)
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
-  - [Performance Tests](#performance-tests)
+  - [Performance Benchmark](#performance-benchmark)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -235,9 +235,7 @@ auto rows = csv.rows();
 // [{"a": 1, "b": 2, "c": 3}, {"a": "4", "b": "5", "c": "6"}, {"a": "10", "b": "11", "c": "12"}]
 ```
 
-## Performance Tests
-
-Here's the function being measured:
+## Performance Benchmark
 
 ```cpp
 // benchmark.cpp
@@ -261,7 +259,7 @@ $ g++ -pthread -std=c++11 -O3 -Iinclude/ -o test benchmark.cpp
 $ time ./test
 ```
 
-Each test is run 20 times on an Intel(R) Core(TM) i7-6650-U @ 2.20 GHz CPU. Here are the average-case execution times:
+Each test is run 30 times on an Intel(R) Core(TM) i7-6650-U @ 2.20 GHz CPU. Here are the average-case execution times:
 
 ###
 
