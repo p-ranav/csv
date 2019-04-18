@@ -1,4 +1,4 @@
-# CSV Parser for Modern C++
+# Fast CSV Parser for Modern C++
 
 ## Highlights
 
@@ -6,23 +6,24 @@
 * Fast, asynchronous, multi-threaded processing using:
   - [Lock-free Concurrent Queues](https://github.com/cameron314/concurrentqueue)
   - [Robin hood Hashing](https://github.com/Tessil/robin-map)
-  - [Memory-mapped File I/O](https://github.com/mandreyel/mio)
 * Requires C++11
-* MIT License
+* BSD 2-Clause "Simplified" License
 
 ## Table of Contents
 
-* [Reading CSV files](#reading-csv-files)
+* [Reading CSV files](#quick-start)
   - [Dialects](#dialects)
      - [Configuring Custom Dialects](#configuring-custom-dialects)
   - [Multi-character Delimiters](#multi-character-delimiters)
   - [Ignoring Columns](#ignoring-columns)
   - [No Header?](#no-header)
-  - [Performance Benchmarks](#performance-benchmarks)
+  - [Dealing with Empty Rows](#dealing-with-empty-rows)
+* [Performance Benchmarks](#performance-benchmarks)
+* [Supported Compilers](#supported-compilers)
 * [Contributing](#contributing)
 * [License](#license)
 
-## Reading CSV files
+## Quick Start
 
 Simply include reader.hpp and you're good to go.
 
@@ -41,7 +42,7 @@ This ```.read``` method is non-blocking. The reader spawns multiple threads to t
 ```cpp
 while(foo.busy()) {
   if (foo.has_row()) {
-    auto row = foo.next_row();    // Each row is a robin_map (https://github.com/Tessil/robin-map)
+    auto row = foo.next_row();    // Each row is a tsl::robin_map (https://github.com/Tessil/robin-map)
     auto foo = row["foo"]         // You can use it just like an std::unordered_map
     auto bar = row["bar"];
     // do something
@@ -100,6 +101,8 @@ for (auto& row : csv.rows()) {
 | ignore_columns | ```std::vector<std::string>``` | specifies the list of columns to ignore. These columns will be stripped during the parsing process. Default = ```{}``` - no column ignored |
 | header | ```bool``` | indicates whether the file includes a header row. If true the first row in the file is a header row, not data. Default = ```true``` |
 | column_names | ```std::vector<std::string>``` | specifies the list of column names. This is useful when the first row of the CSV isn't a header Default = ```{}``` |
+
+The line terminator is ```'\n'``` by default. I use std::getline and handle stripping out ```'\r'``` from line endings. So, for now, this is not configurable in custom dialects. 
 
 ## Multi-character Delimiters
 
@@ -195,37 +198,52 @@ If ```.column_names``` is not called, then the reader simply generates dictionar
 [{"0": "9", "1": "52", "2": "1"}, {"0": "52", "1": "91", "2": "0"}, ...]
 ```
 
-## Performance Benchmarks
+## Dealing with Empty Rows
 
-I've run some performance tests on my Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz | 16GB RAM). 
+Sometimes you have to deal with a CSV file that has empty lines; either in the middle or at the end of the file:
 
-Here's the function being measured:
+```csv
+a,b,c
+1,2,3
 
-```cpp
-void parse(const std::string& filename) {
-  csv::Reader foo;
-  foo.read(filename);
-  std::vector<csv::robin_map<std::string, std::string>> rows;
-  while (foo.busy()) {
-    if (foo.ready()) {
-      auto row = foo.next_row();
-      rows.push_back(row);
-    }
-  }
-  std::cout << "Num rows: " << rows.size() << std::endl;
-}
+4,5,6
+
+10,11,12
+
+
+
 ```
 
-and here are the results:
+Here's how this get's parsed by default:
 
-| Dataset | Rows | Cols | Time |
-|---------------------------------------------------------------------------------------|-----------|------|-----------------------------|
-| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 237 | 46 | 0.0265 s |
-| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 761,817 | 3 | 0.677 s |
-| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 1,000,000 | 12 | 3.21 s |
+```cpp
+csv::Reader csv;
+csv.read("inputs/empty_lines.csv");
+auto rows = csv.rows();
+// [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", "b": "", "c": ""}, ...]
+```
+
+If you don't care for these empty rows, simply call ```.skip_empty_rows(true)```
+
+```cpp
+csv::Reader csv;
+csv.configure_dialect()
+  .skip_empty_rows(true);
+csv.read("inputs/empty_lines.csv");
+auto rows = csv.rows();
+// [{"a": 1, "b": 2, "c": 3}, {"a": "4", "b": "5", "c": "6"}, {"a": "10", "b": "11", "c": "12"}]
+```
+
+## Performance Benchmarks
+
+
+## Supported Compilers
+* GCC >= 7.0.0
+* Clang >= 4.0
+* MSVC >= 2017
 
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
 ## License
-This project is available under the [BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause) license.
+This project is available under the [MIT](https://opensource.org/licenses/MIT) license.

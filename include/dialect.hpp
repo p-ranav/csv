@@ -55,7 +55,8 @@ namespace csv {
       quote_character_('"'),
       double_quote_(true),
       trim_characters_({}),
-      header_(true) {}
+      header_(true),
+      skip_empty_rows_(false) {}
 
     Dialect& delimiter(const std::string& delimiter) {
       delimiter_ = delimiter;
@@ -64,6 +65,11 @@ namespace csv {
 
     Dialect& skip_initial_space(bool skip_initial_space) {
       skip_initial_space_ = skip_initial_space;
+      return *this;
+    }
+
+    Dialect& skip_empty_rows(bool skip_empty_rows) {
+      skip_empty_rows_ = skip_empty_rows;
       return *this;
     }
 
