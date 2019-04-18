@@ -190,7 +190,7 @@ namespace csv {
           rows.push_back(next_row());
         }
       }
-      return rows;
+      return std::move(rows);
     }
 
     std::vector<std::string> cols() {
@@ -300,7 +300,7 @@ namespace csv {
     }
 
     // trim white spaces from the left end of an input string
-    std::string ltrim(std::string input) {
+    std::string ltrim(std::string const& input) {
       std::string result = input;
       std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
       result.erase(result.begin(), std::find_if(result.begin(), result.end(), [=](int ch) {
@@ -311,7 +311,7 @@ namespace csv {
     }
 
     // trim white spaces from right end of an input string
-    std::string rtrim(std::string input) {
+    std::string rtrim(std::string const& input) {
       std::string result = input;
       std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
       result.erase(std::find_if(result.rbegin(), result.rend(), [=](int ch) {
@@ -322,7 +322,7 @@ namespace csv {
     }
 
     // trim white spaces from either end of an input string
-    std::string trim(std::string input) {
+    std::string trim(std::string const& input) {
       std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
       if (dialect->trim_characters_.size() == 0)
         return input;
@@ -332,7 +332,7 @@ namespace csv {
     // split string based on a delimiter string
     // supports multi-character delimiter
     // returns a vector of substrings after split
-    std::vector<std::string> split(const std::string& input_string, std::shared_ptr<Dialect> dialect) {
+    std::vector<std::string> split(std::string const& input_string, std::shared_ptr<Dialect> dialect) {
       std::vector<std::string> result;
       if (input_string == "") {
         for (size_t i = 0; i < columns_; i++) {
