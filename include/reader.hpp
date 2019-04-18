@@ -347,8 +347,9 @@ namespace csv {
       std::string sub_result = "";
       bool discard_delimiter = false;
       size_t quotes_encountered = 0;
+      size_t input_string_size = input_string.size();
 
-      for (size_t i = 0; i < input_string.size(); ++i) {
+      for (size_t i = 0; i < input_string_size; ++i) {
 
         // Check if ch is the start of a delimiter sequence
         bool delimiter_detected = false;
@@ -370,7 +371,7 @@ namespace csv {
                 sub_result = "";
 
                 // If enabled, skip initial space right after delimiter
-                if (i + 1 < input_string.size()) {
+                if (i + 1 < input_string_size) {
                   if (dialect->skip_initial_space_ && input_string[i + 1] == ' ') {
                     i = i + 1;
                   }
@@ -380,13 +381,13 @@ namespace csv {
               else {
                 sub_result += input_string[i];
                 i = i + 1;
-                if (i == input_string.size()) break;
+                if (i == input_string_size) break;
               }
             }
             else {
               // Keep looking
               i = i + 1;
-              if (i == input_string.size()) break;
+              if (i == input_string_size) break;
             }
           }
         }
