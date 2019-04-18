@@ -240,6 +240,7 @@ auto rows = csv.rows();
 Here's the function being measured:
 
 ```cpp
+// benchmark.cpp
 void parse(const std::string& filename) {
   csv::Reader foo;
   foo.read(filename);
@@ -254,12 +255,18 @@ void parse(const std::string& filename) {
 }
 ```
 
+```bash
+g++ -pthread -std=c++11 -O3 -Iinclude/ -o test benchmark.cpp
+```
+
 and here are the results:
 
 ```
 Microsoft Surface Pro 4
 Intel(R) Core(TM) i7-6650-U @ 2.20 GHz
 ```
+
+Each test is run 20 times and here are the average-case execution times:
 
 | Dataset | File Size | Rows | Cols | Time |
 |---------------------------------------------------------------------------------------|-----------|-------|------|-----------------------------|
