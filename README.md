@@ -262,12 +262,14 @@ g++ -pthread -std=c++11 -O3 -Iinclude/ -o test benchmark.cpp
 
 Each test is run 20 times in the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/faq) on my Microsoft Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz). Here are the average-case execution times:
 
+###
+
 | Dataset | File Size | Rows | Cols | Time |
 |---------------------------------------------------------------------------------------|-----------|-------|------|-----------------------------|
-| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | ```27 KB``` | ```237``` | ```46``` | ```26.5 ms``` |
-| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | ```14.1 MB``` | ```761,817``` | ```3``` | ```0.677 s``` |
-| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | ```77.7 MB``` | ```1,000,000``` | ```12``` | ```3.21 s``` |
-| [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | ```1.50 GB``` | ```6,846,406``` | ```22``` | ```1m 53s``` |
+| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 27 KB | 237 | 46 | 26.5 ms |
+| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | 0.677 s |
+| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 3.21 s |
+| [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 6,846,406 | 22 | 1m 53s |
 
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
