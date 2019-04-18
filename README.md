@@ -260,12 +260,7 @@ void parse(const std::string& filename) {
 g++ -pthread -std=c++11 -O3 -Iinclude/ -o test benchmark.cpp
 ```
 
-Each test is run 20 times. Here are the average-case execution times:
-
-```
-Microsoft Surface Pro 4
-Intel(R) Core(TM) i7-6650-U @ 2.20 GHz
-```
+Each test is run 20 times in the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/faq) on my Microsoft Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz). Here are the average-case execution times:
 
 | Dataset | File Size | Rows | Cols | Time |
 |---------------------------------------------------------------------------------------|-----------|-------|------|-----------------------------|
