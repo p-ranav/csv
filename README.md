@@ -1,4 +1,4 @@
-# Fast CSV Parser for Modern C++
+# CSV Parser for Modern C++
 
 ## Highlights
 
@@ -7,23 +7,22 @@
   - [Lock-free Concurrent Queues](https://github.com/cameron314/concurrentqueue)
   - [Robin hood Hashing](https://github.com/Tessil/robin-map)
 * Requires C++11
-* BSD 2-Clause "Simplified" License
+* MIT License
 
 ## Table of Contents
 
-* [Reading CSV files](#quick-start)
+* [Reading CSV files](#reading-csv-files)
   - [Dialects](#dialects)
      - [Configuring Custom Dialects](#configuring-custom-dialects)
   - [Multi-character Delimiters](#multi-character-delimiters)
   - [Ignoring Columns](#ignoring-columns)
   - [No Header?](#no-header)
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
-* [Performance Benchmarks](#performance-benchmarks)
-* [Supported Compilers](#supported-compilers)
+  - [Performance Benchmarks](#performance-benchmarks)
 * [Contributing](#contributing)
 * [License](#license)
 
-## Quick Start
+## Reading CSV files
 
 Simply include reader.hpp and you're good to go.
 
@@ -42,7 +41,7 @@ This ```.read``` method is non-blocking. The reader spawns multiple threads to t
 ```cpp
 while(foo.busy()) {
   if (foo.has_row()) {
-    auto row = foo.next_row();    // Each row is a tsl::robin_map (https://github.com/Tessil/robin-map)
+    auto row = foo.next_row();    // Each row is a robin_map (https://github.com/Tessil/robin-map)
     auto foo = row["foo"]         // You can use it just like an std::unordered_map
     auto bar = row["bar"];
     // do something
@@ -83,7 +82,8 @@ csv.configure_dialect("my fancy dialect")
   .skip_initial_space(false)
   .trim_characters(' ', '\t')    // parameter packed
   .ignore_columns("foo", "bar")  // parameter packed
-  .header(true);
+  .header(true)
+  .skip_empty_rows(true);
 
 csv.read("foo.csv");
 for (auto& row : csv.rows()) {
@@ -101,6 +101,7 @@ for (auto& row : csv.rows()) {
 | ignore_columns | ```std::vector<std::string>``` | specifies the list of columns to ignore. These columns will be stripped during the parsing process. Default = ```{}``` - no column ignored |
 | header | ```bool``` | indicates whether the file includes a header row. If true the first row in the file is a header row, not data. Default = ```true``` |
 | column_names | ```std::vector<std::string>``` | specifies the list of column names. This is useful when the first row of the CSV isn't a header Default = ```{}``` |
+| skip_empty_rows | ```bool``` | specifies how empty rows should be interpreted. If this is set to true, empty rows are skipped. Default = ```false``` |
 
 The line terminator is ```'\n'``` by default. I use std::getline and handle stripping out ```'\r'``` from line endings. So, for now, this is not configurable in custom dialects. 
 
@@ -220,7 +221,7 @@ Here's how this get's parsed by default:
 csv::Reader csv;
 csv.read("inputs/empty_lines.csv");
 auto rows = csv.rows();
-// [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", "b": "", "c": ""}, ...]
+// [{"a": 1, "b": 2, "c": 3}, {"a": "", "b": "", "c": ""}, {"a": "4", "b": "5", "c": "6"}, {"a": "", ...}]
 ```
 
 If you don't care for these empty rows, simply call ```.skip_empty_rows(true)```
@@ -236,14 +237,35 @@ auto rows = csv.rows();
 
 ## Performance Benchmarks
 
+I've run some performance tests on my Surface Pro 4 (Intel(R) Core(TM) i7-6650-U @ 2.20 GHz | 16GB RAM). 
 
-## Supported Compilers
-* GCC >= 7.0.0
-* Clang >= 4.0
-* MSVC >= 2017
+Here's the function being measured:
+
+```cpp
+void parse(const std::string& filename) {
+  csv::Reader foo;
+  foo.read(filename);
+  std::vector<csv::robin_map<std::string, std::string>> rows;
+  while (foo.busy()) {
+    if (foo.ready()) {
+      auto row = foo.next_row();
+      rows.push_back(row);
+    }
+  }
+  std::cout << "Num rows: " << rows.size() << std::endl;
+}
+```
+
+and here are the results:
+
+| Dataset | Rows | Cols | Time |
+|---------------------------------------------------------------------------------------|-----------|------|-----------------------------|
+| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 237 | 46 | 0.0265 s |
+| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 761,817 | 3 | 0.677 s |
+| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 1,000,000 | 12 | 3.21 s |
 
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
 ## License
-This project is available under the [MIT](https://opensource.org/licenses/MIT) license.
+This project is available under the [BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause) license.
