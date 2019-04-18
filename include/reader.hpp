@@ -63,7 +63,8 @@ namespace csv {
       rows_ctoken_(ConsumerToken(rows_)),
       done_index_(0),
       ready_index_(0),
-      next_index_(0) {
+      next_index_(0),
+      trimming_enabled_(false) {
 
       std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
       unix_dialect
@@ -147,6 +148,9 @@ namespace csv {
 
       stream_.clear();
       stream_.seekg(0, std::ios::beg);
+
+      if (dialects_[current_dialect_]->trim_characters_.size() > 0)
+        trimming_enabled_ = true;
 
       reading_thread_started_ = true;
       reading_thread_ = std::thread(&Reader::read_internal, this);
@@ -362,7 +366,7 @@ namespace csv {
                 // Reached end of delimiter sequence without breaking
                 // delimiter detected!
                 delimiter_detected = true;
-                result.push_back(trim(sub_result));
+                result.push_back(trimming_enabled_ ? trim(sub_result) : sub_result);
                 sub_result = "";
 
                 // If enabled, skip initial space right after delimiter
@@ -401,7 +405,7 @@ namespace csv {
       }
 
       if (sub_result != "")
-        result.push_back(trim(sub_result));
+        result.push_back(trimming_enabled_ ? trim(sub_result) : sub_result);
 
       if (result.size() < columns_) {
         for (size_t i = result.size(); i < columns_; i++) {
@@ -454,6 +458,7 @@ namespace csv {
     size_t done_index_;
     size_t ready_index_;
     size_t next_index_;
+    bool trimming_enabled_;
   };
 
 }
