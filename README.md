@@ -251,7 +251,8 @@ void parse(const std::string& filename) {
       rows.push_back(row);
     }
   }
-  std::cout << "Num rows: " << rows.size() << std::endl;
+  auto shape = foo.shape();
+  std::cout << "(" << shape.first << " " << shape.second << ")" << std::endl;
 }
 ```
 
