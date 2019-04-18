@@ -64,6 +64,7 @@ namespace csv {
       done_index_(0),
       ready_index_(0),
       next_index_(0),
+      ignore_columns_enabled_(false),
       trimming_enabled_(false) {
 
       std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
@@ -152,6 +153,9 @@ namespace csv {
 
       if (current_dialect_->trim_characters_.size() > 0)
         trimming_enabled_ = true;
+
+      if (current_dialect_->ignore_columns_.size() > 0)
+        ignore_columns_enabled_ = true;
 
       reading_thread_started_ = true;
       reading_thread_ = std::thread(&Reader::read_internal, this);
@@ -251,8 +255,9 @@ namespace csv {
 
       for (auto& header : headers_)
         current_row_[header] = "";
-      for (auto&kvpair : current_dialect_->ignore_columns_)
-        current_row_.erase(kvpair.first);
+      if (ignore_columns_enabled_)
+        for (auto&kvpair : current_dialect_->ignore_columns_)
+          current_row_.erase(kvpair.first);
 
       // Start processing thread
       processing_thread_ = std::thread(&Reader::process_values, this);
@@ -279,18 +284,15 @@ namespace csv {
     void process_values() {
       size_t index = 0;
       auto ignore_columns = current_dialect_->ignore_columns_;
-      std::string value;
       size_t i;
       std::string column_name;
       size_t number_of_rows = 0;
-      while (true) {
-        if (number_of_rows == expected_number_of_rows_)
-          break;
-        if (front(value)) {
+      while (number_of_rows < expected_number_of_rows_) {
+        if (front(current_value_)) {
           i = index % columns_;
           column_name = headers_[i];
-          if (ignore_columns.count(column_name) == 0)
-            current_row_[column_name] = value;
+          if (!ignore_columns_enabled_ || ignore_columns.count(column_name) == 0)
+            current_row_[column_name] = current_value_;
           index += 1;
           if (index != 0 && index % columns_ == 0) {
             rows_.try_enqueue(current_row_);
@@ -332,9 +334,7 @@ namespace csv {
     void split(std::string const& input_string) {
       current_split_result_.clear();
       if (input_string == "") {
-        for (size_t i = 0; i < columns_; i++) {
-          current_split_result_.push_back("");
-        }
+        current_split_result_ = std::vector<std::string>(columns_, "");
       }
 
       std::string sub_result = "";
@@ -415,6 +415,7 @@ namespace csv {
     std::ifstream stream_;
     std::vector<std::string> headers_;
     robin_map<std::string, std::string> current_row_;
+    std::string current_value_;
     ConcurrentQueue<robin_map<std::string, std::string>> rows_;
     ProducerToken rows_ptoken_;
     ConsumerToken rows_ctoken_;
@@ -447,6 +448,7 @@ namespace csv {
     size_t done_index_;
     size_t ready_index_;
     size_t next_index_;
+    bool ignore_columns_enabled_;
     bool trimming_enabled_;
     std::vector<std::string> current_split_result_;
   };
