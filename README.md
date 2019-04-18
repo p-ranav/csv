@@ -261,12 +261,12 @@ void parse(const std::string& filename) {
 
 and here are the results:
 
-| Dataset | Rows | Cols | Time |
+| Dataset | File Size | Rows | Cols | Time |
 |---------------------------------------------------------------------------------------|-----------|------|-----------------------------|
-| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 237 | 46 | 0.0265 s |
-| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 761,817 | 3 | 0.677 s |
-| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 1,000,000 | 12 | 3.21 s |
-| [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 4,496,262 | 44 | 42.75 s |
+| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 27 KB | 237 | 46 | 0.0265 s |
+| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | 0.677 s |
+| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 3.21 s |
+| [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 4,496,262 | 44 | 42.75 s |
 
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
