@@ -18,7 +18,7 @@
   - [Ignoring Columns](#ignoring-columns)
   - [No Header?](#no-header)
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
-  - [Performance Benchmarks](#performance-benchmarks)
+  - [Performance Tests](#performance-tests)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -235,12 +235,7 @@ auto rows = csv.rows();
 // [{"a": 1, "b": 2, "c": 3}, {"a": "4", "b": "5", "c": "6"}, {"a": "10", "b": "11", "c": "12"}]
 ```
 
-## Performance Benchmarks
-
-```
-Microsoft Surface Pro 4
-Intel(R) Core(TM) i7-6650-U @ 2.20 GHz
-```
+## Performance Tests
 
 Here's the function being measured:
 
@@ -261,12 +256,17 @@ void parse(const std::string& filename) {
 
 and here are the results:
 
+```
+Microsoft Surface Pro 4
+Intel(R) Core(TM) i7-6650-U @ 2.20 GHz
+```
+
 | Dataset | File Size | Rows | Cols | Time |
 |---------------------------------------------------------------------------------------|-----------|-------|------|-----------------------------|
-| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 27 KB | 237 | 46 | 26.5 ms |
-| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | 0.677 s |
-| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 3.21 s |
-| [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 6,846,406 | 22 | 1m 53s |
+| [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 27 KB | 237 | 46 | ```26.5 ms``` |
+| [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | ```0.677 s``` |
+| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | ```3.21 s``` |
+| [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 6,846,406 | 22 | ```1m 53s``` |
 
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
