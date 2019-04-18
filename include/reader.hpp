@@ -52,7 +52,7 @@ namespace csv {
     Reader() :
       filename_(""),
       columns_(0),
-      current_dialect_("excel"),
+      current_dialect_name_("excel"),
       reading_thread_started_(false),
       processing_thread_started_(false),
       row_iterator_index_(0),
@@ -127,6 +127,7 @@ namespace csv {
     }
 
     void read(const std::string& filename) {
+      current_dialect_ = dialects_[current_dialect_name_];
       filename_ = filename;
       stream_ = std::ifstream(filename_);
       if (!stream_.is_open()) {
@@ -139,17 +140,17 @@ namespace csv {
       while (std::getline(stream_, line)) {
         if (line.size() > 0 && line[line.size() - 1] == '\r')
           line.pop_back();
-        if (line != "" || (!dialects_[current_dialect_]->skip_empty_rows_ && line == ""))
+        if (line != "" || (!current_dialect_->skip_empty_rows_ && line == ""))
           ++expected_number_of_rows_;
       }
 
-      if (dialects_[current_dialect_]->header_ && expected_number_of_rows_ > 0)
+      if (current_dialect_->header_ && expected_number_of_rows_ > 0)
         expected_number_of_rows_ -= 1;
 
       stream_.clear();
       stream_.seekg(0, std::ios::beg);
 
-      if (dialects_[current_dialect_]->trim_characters_.size() > 0)
+      if (current_dialect_->trim_characters_.size() > 0)
         trimming_enabled_ = true;
 
       reading_thread_started_ = true;
@@ -164,7 +165,7 @@ namespace csv {
       else {
         std::shared_ptr<Dialect> dialect_object = std::make_shared<Dialect>();
         dialects_[dialect_name] = dialect_object;
-        current_dialect_ = dialect_name;
+        current_dialect_name_ = dialect_name;
         return *dialect_object;
       }
     }
@@ -181,7 +182,7 @@ namespace csv {
     }
 
     void use_dialect(const std::string& dialect_name) {
-      current_dialect_ = dialect_name;
+      current_dialect_name_ = dialect_name;
       if (dialects_.find(dialect_name) == dialects_.end()) {
         throw std::runtime_error("error: Dialect " + dialect_name + " not found");
       }
@@ -211,9 +212,8 @@ namespace csv {
     }
 
     void read_internal() {
-      std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
-      if (!dialect) {
-        throw std::runtime_error("error: Dialect " + current_dialect_ + " not found");
+      if (!current_dialect_) {
+        throw std::runtime_error("error: Dialect " + current_dialect_name_ + " not found");
       }
 
       // Get current position
@@ -230,17 +230,17 @@ namespace csv {
         first_line.pop_back();
       }
 
-      auto first_line_split = split(first_line, dialect);
-      if (dialect->header_) {
-        headers_ = first_line_split;
+      split(first_line);
+      if (current_dialect_->header_) {
+        headers_ = current_split_result_;
       }
       else {
         headers_.clear();
-        if (dialect->column_names_.size() > 0) {
-          headers_ = dialect->column_names_;
+        if (current_dialect_->column_names_.size() > 0) {
+          headers_ = current_dialect_->column_names_;
         }
         else {
-          for (size_t i = 0; i < first_line_split.size(); i++)
+          for (size_t i = 0; i < current_split_result_.size(); i++)
             headers_.push_back(std::to_string(i));
         }
         // return to start before getline()
@@ -251,7 +251,7 @@ namespace csv {
 
       for (auto& header : headers_)
         current_row_[header] = "";
-      for (auto&kvpair : dialects_[current_dialect_]->ignore_columns_)
+      for (auto&kvpair : current_dialect_->ignore_columns_)
         current_row_.erase(kvpair.first);
 
       // Start processing thread
@@ -262,14 +262,14 @@ namespace csv {
 
       // Get lines one at a time, split on the delimiter and 
       // enqueue the split results into the values_ queue
-      bool skip_empty_rows = dialect->skip_empty_rows_;
+      bool skip_empty_rows = current_dialect_->skip_empty_rows_;
       std::string row;
       while (std::getline(stream_, row)) {
         if (row.size() > 0 && row[row.size() - 1] == '\r')
           row.pop_back();
         if (row != "" || (!skip_empty_rows && row == "")) {
-          auto row_split = split(row, dialect);
-          for (auto& value : row_split)
+          split(row);
+          for (auto& value : current_split_result_)
             values_.enqueue(values_ptoken_, value);
         }
       }
@@ -278,9 +278,7 @@ namespace csv {
 
     void process_values() {
       size_t index = 0;
-      size_t cols = headers_.size();
-      std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
-      auto ignore_columns = dialect->ignore_columns_;
+      auto ignore_columns = current_dialect_->ignore_columns_;
       std::string value;
       size_t i;
       std::string column_name;
@@ -289,12 +287,12 @@ namespace csv {
         if (number_of_rows == expected_number_of_rows_)
           break;
         if (front(value)) {
-          i = index % cols;
+          i = index % columns_;
           column_name = headers_[i];
           if (ignore_columns.count(column_name) == 0)
             current_row_[column_name] = value;
           index += 1;
-          if (index != 0 && index % cols == 0) {
+          if (index != 0 && index % columns_ == 0) {
             rows_.try_enqueue(current_row_);
             number_of_rows += 1;
             number_of_rows_processed_.enqueue(number_of_rows);
@@ -306,10 +304,9 @@ namespace csv {
     // trim white spaces from the left end of an input string
     std::string ltrim(std::string const& input) {
       std::string result = input;
-      std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
       result.erase(result.begin(), std::find_if(result.begin(), result.end(), [=](int ch) {
-        return !(std::find(dialect->trim_characters_.begin(), dialect->trim_characters_.end(), ch)
-          != dialect->trim_characters_.end());
+        return !(std::find(current_dialect_->trim_characters_.begin(), current_dialect_->trim_characters_.end(), ch)
+          != current_dialect_->trim_characters_.end());
       }));
       return std::move(result);
     }
@@ -317,30 +314,26 @@ namespace csv {
     // trim white spaces from right end of an input string
     std::string rtrim(std::string const& input) {
       std::string result = input;
-      std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
       result.erase(std::find_if(result.rbegin(), result.rend(), [=](int ch) {
-        return !(std::find(dialect->trim_characters_.begin(), dialect->trim_characters_.end(), ch)
-          != dialect->trim_characters_.end());
+        return !(std::find(current_dialect_->trim_characters_.begin(), current_dialect_->trim_characters_.end(), ch)
+          != current_dialect_->trim_characters_.end());
       }).base(), result.end());
       return std::move(result);
     }
 
     // trim white spaces from either end of an input string
     std::string trim(std::string const& input) {
-      std::shared_ptr<Dialect> dialect = dialects_[current_dialect_];
-      if (dialect->trim_characters_.size() == 0)
+      if (current_dialect_->trim_characters_.size() == 0)
         return input;
       return ltrim(rtrim(input));
     }
 
-    // split string based on a delimiter string
-    // supports multi-character delimiter
-    // returns a vector of substrings after split
-    std::vector<std::string> split(std::string const& input_string, std::shared_ptr<Dialect> dialect) {
-      std::vector<std::string> result;
+    // split string based on a delimiter sub-string
+    void split(std::string const& input_string) {
+      current_split_result_.clear();
       if (input_string == "") {
         for (size_t i = 0; i < columns_; i++) {
-          result.push_back("");
+          current_split_result_.push_back("");
         }
       }
 
@@ -353,26 +346,26 @@ namespace csv {
 
         // Check if ch is the start of a delimiter sequence
         bool delimiter_detected = false;
-        for (size_t j = 0; j < dialect->delimiter_.size(); ++j) {
+        for (size_t j = 0; j < current_dialect_->delimiter_.size(); ++j) {
 
           char ch = input_string[i];
-          if (ch != dialect->delimiter_[j]) {
+          if (ch != current_dialect_->delimiter_[j]) {
             delimiter_detected = false;
             break;
           }
           else {
             // ch *might* be the start of a delimiter sequence
-            if (j + 1 == dialect->delimiter_.size()) {
+            if (j + 1 == current_dialect_->delimiter_.size()) {
               if (quotes_encountered % 2 == 0) {
                 // Reached end of delimiter sequence without breaking
                 // delimiter detected!
                 delimiter_detected = true;
-                result.push_back(trimming_enabled_ ? trim(sub_result) : sub_result);
+                current_split_result_.push_back(trimming_enabled_ ? trim(sub_result) : sub_result);
                 sub_result = "";
 
                 // If enabled, skip initial space right after delimiter
                 if (i + 1 < input_string_size) {
-                  if (dialect->skip_initial_space_ && input_string[i + 1] == ' ') {
+                  if (current_dialect_->skip_initial_space_ && input_string[i + 1] == ' ') {
                     i = i + 1;
                   }
                 }
@@ -396,32 +389,26 @@ namespace csv {
         if (!delimiter_detected)
           sub_result += input_string[i];
 
-        if (input_string[i] == dialect->quote_character_)
+        if (input_string[i] == current_dialect_->quote_character_)
           quotes_encountered += 1;
-        if (input_string[i] == dialect->quote_character_ &&
-          dialect->double_quote_ &&
+        if (input_string[i] == current_dialect_->quote_character_ &&
+          current_dialect_->double_quote_ &&
           sub_result.size() >= 2 &&
           sub_result[sub_result.size() - 2] == input_string[i])
           quotes_encountered -= 1;
       }
 
       if (sub_result != "")
-        result.push_back(trimming_enabled_ ? trim(sub_result) : sub_result);
+        current_split_result_.push_back(trimming_enabled_ ? trim(sub_result) : sub_result);
 
-      if (result.size() < columns_) {
-        for (size_t i = result.size(); i < columns_; i++) {
-          result.push_back("");
+      if (current_split_result_.size() < columns_) {
+        for (size_t i = current_split_result_.size(); i < columns_; i++) {
+          current_split_result_.push_back("");
         }
       }
-      else if (result.size() > columns_ && columns_ != 0) {
-        std::vector<std::string> result_sliced;
-        for (size_t i = 0; i < columns_; i++) {
-          result_sliced.push_back(result[i]);
-        }
-        return result_sliced;
+      else if (current_split_result_.size() > columns_ && columns_ != 0) {
+        current_split_result_.resize(columns_);
       }
-
-      return std::move(result);
     }
 
     std::string filename_;
@@ -454,12 +441,14 @@ namespace csv {
     ConcurrentQueue<std::string> values_;
     ProducerToken values_ptoken_;
     ConsumerToken values_ctoken_;
-    std::string current_dialect_;
+    std::string current_dialect_name_;
     robin_map<std::string, std::shared_ptr<Dialect>> dialects_;
+    std::shared_ptr<Dialect> current_dialect_;
     size_t done_index_;
     size_t ready_index_;
     size_t next_index_;
     bool trimming_enabled_;
+    std::vector<std::string> current_split_result_;
   };
 
 }
