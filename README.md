@@ -18,6 +18,7 @@
   - [Ignoring Columns](#ignoring-columns)
   - [No Header?](#no-header)
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
+  - [Reading first N rows](#reading-first-n-rows)
   - [Performance Benchmark](#performance-benchmark)
 * [Contributing](#contributing)
 * [License](#license)
@@ -233,6 +234,16 @@ csv.configure_dialect()
 csv.read("inputs/empty_lines.csv");
 auto rows = csv.rows();
 // [{"a": 1, "b": 2, "c": 3}, {"a": "4", "b": "5", "c": "6"}, {"a": "10", "b": "11", "c": "12"}]
+```
+
+## Reading first N rows
+
+If you know exactly how many rows to parse, you can help out the reader by using the ```.read(filename, num_rows)``` overloaded method. This saves the reader from trying to figure out the number of lines in the CSV file. You can use this method to parse the first N rows of the file instead of parsing all of it. 
+
+```cpp
+csv::Reader foo;
+foo.read(filename, 1000);
+auto rows = foo.rows();
 ```
 
 ## Performance Benchmark
