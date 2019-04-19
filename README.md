@@ -6,7 +6,7 @@
 * Fast, asynchronous, multi-threaded processing using:
   - [Lock-free Concurrent Queues](https://github.com/cameron314/concurrentqueue)
   - [Robin hood Hashing](https://github.com/Tessil/robin-map)
-* Requires C++11
+* Requires C++17
 * MIT License
 
 ## Table of Contents
@@ -19,6 +19,7 @@
   - [No Header?](#no-header)
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
   - [Performance Benchmark](#performance-benchmark)
+* [Supported Compilers](#supported-compilers)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -269,6 +270,11 @@ Each test is run 30 times on an Intel(R) Core(TM) i7-6650-U @ 2.20 GHz CPU. Here
 | [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | 0.549s |
 | [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 2.425s |
 | [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 6,846,406 | 22 | 35.459s |
+
+## Supported Compilers
+* GCC >= 7.0.0
+* Clang >= 4.0
+* MSVC >= 2017
 
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
