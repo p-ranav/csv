@@ -98,7 +98,13 @@ namespace csv {
     }
 
     bool busy() {
-      return !done();
+      if (processing_thread_started_) {
+        row_iterator_queue_.try_dequeue(done_index_);
+        row_iterator_queue_.enqueue(done_index_);
+        bool result = (expected_number_of_rows_ == 0 || done_index_ + 1 == expected_number_of_rows_);
+        return !result;
+      }
+      else return true;
     }
 
     bool done() {
