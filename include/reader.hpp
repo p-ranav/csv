@@ -44,6 +44,7 @@ SOFTWARE.
 #include <mutex>
 #include <condition_variable>
 #include <iterator>
+#include <string_view>
 
 namespace csv {
 
@@ -119,10 +120,10 @@ namespace csv {
       return result;
     }
 
-    robin_map<std::string, std::string> next_row() {
+    robin_map<std::string_view, std::string> next_row() {
       row_iterator_queue_.enqueue(next_index_);
       next_index_ += 1;
-      robin_map<std::string, std::string> result;
+      robin_map<std::string_view, std::string> result;
       rows_.try_dequeue(rows_ctoken_, result);
       return result;
     }
@@ -170,12 +171,13 @@ namespace csv {
         std::shared_ptr<Dialect> dialect_object = std::make_shared<Dialect>();
         dialects_[dialect_name] = dialect_object;
         current_dialect_name_ = dialect_name;
+        current_dialect_ = dialects_[current_dialect_name_];
         return *dialect_object;
       }
     }
 
-    std::vector<std::string> list_dialects() {
-      std::vector<std::string> result;
+    std::vector<std::string_view> list_dialects() {
+      std::vector<std::string_view> result;
       for (auto&kvpair : dialects_)
         result.push_back(kvpair.first);
       return result;
@@ -192,8 +194,8 @@ namespace csv {
       }
     }
 
-    std::vector<robin_map<std::string, std::string>> rows() {
-      std::vector<robin_map<std::string, std::string>> rows;
+    std::vector<robin_map<std::string_view, std::string>> rows() {
+      std::vector<robin_map<std::string_view, std::string>> rows;
       while (!done()) {
         if (ready()) {
           rows.push_back(next_row());
@@ -414,9 +416,9 @@ namespace csv {
     std::string filename_;
     std::ifstream stream_;
     std::vector<std::string> headers_;
-    robin_map<std::string, std::string> current_row_;
+    robin_map<std::string_view, std::string> current_row_;
     std::string current_value_;
-    ConcurrentQueue<robin_map<std::string, std::string>> rows_;
+    ConcurrentQueue<robin_map<std::string_view, std::string>> rows_;
     ProducerToken rows_ptoken_;
     ConsumerToken rows_ctoken_;
     ConcurrentQueue<size_t> number_of_rows_processed_;
