@@ -242,7 +242,7 @@ If you know exactly how many rows to parse, you can help out the reader by using
 
 ```cpp
 csv::Reader foo;
-foo.read(filename, 1000);
+foo.read("bar.csv", 1000);
 auto rows = foo.rows();
 ```
 
