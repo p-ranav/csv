@@ -268,7 +268,7 @@ Each test is run 30 times on an Intel(R) Core(TM) i7-6650-U @ 2.20 GHz CPU. Here
 |:---     |       ---:|  ---:|  ---:|  ---:|
 | [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 27 KB | 237 | 46 | 0.026s |
 | [Three column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | 0.549s |
-| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 2.329s |
+| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 2.312s |
 | [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 6,846,406 | 22 | 35.459s |
 
 ## Supported Compilers
