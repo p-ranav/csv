@@ -259,7 +259,9 @@ $ g++ -pthread -std=c++11 -O3 -Iinclude/ -o test benchmark.cpp
 $ time ./test
 ```
 
-Each test is run 30 times on an Intel(R) Core(TM) i7-6650-U @ 2.20 GHz CPU. Here are the average-case execution times:
+Each test is run 30 times on an Intel(R) Core(TM) i7-6650-U @ 2.20 GHz CPU. 
+
+Here are the average-case execution times:
 
 ###
 
