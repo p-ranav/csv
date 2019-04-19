@@ -133,6 +133,26 @@ namespace csv {
       return result;
     }
 
+    void read(const std::string& filename, size_t rows) {
+      current_dialect_ = dialects_[current_dialect_name_];
+      filename_ = filename;
+      stream_ = std::ifstream(filename_);
+      if (!stream_.is_open()) {
+        throw std::runtime_error("error: Failed to open " + filename_);
+      }
+
+      expected_number_of_rows_ = rows;
+
+      if (current_dialect_->trim_characters_.size() > 0)
+        trimming_enabled_ = true;
+
+      if (current_dialect_->ignore_columns_.size() > 0)
+        ignore_columns_enabled_ = true;
+
+      reading_thread_started_ = true;
+      reading_thread_ = std::thread(&Reader::read_internal, this);
+    }
+
     void read(const std::string& filename) {
       current_dialect_ = dialects_[current_dialect_name_];
       filename_ = filename;
@@ -165,7 +185,6 @@ namespace csv {
 
       reading_thread_started_ = true;
       reading_thread_ = std::thread(&Reader::read_internal, this);
-      return;
     }
 
     Dialect& configure_dialect(const std::string& dialect_name = "excel") {
@@ -275,13 +294,17 @@ namespace csv {
       // enqueue the split results into the values_ queue
       bool skip_empty_rows = current_dialect_->skip_empty_rows_;
       std::string row;
+      size_t number_of_rows = 0;
       while (std::getline(stream_, row)) {
+        if (number_of_rows == expected_number_of_rows_)
+          break;
         if (row.size() > 0 && row[row.size() - 1] == '\r')
           row.pop_back();
         if (row != "" || (!skip_empty_rows && row == "")) {
           split(row);
           for (auto& value : current_split_result_)
             values_.enqueue(values_ptoken_, value);
+          number_of_rows += 1;
         }
       }
       stream_.close();
