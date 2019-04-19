@@ -170,7 +170,6 @@ namespace csv {
         std::shared_ptr<Dialect> dialect_object = std::make_shared<Dialect>();
         dialects_[dialect_name] = dialect_object;
         current_dialect_name_ = dialect_name;
-        current_dialect_ = dialects_[current_dialect_name_];
         return *dialect_object;
       }
     }
@@ -200,7 +199,7 @@ namespace csv {
           rows.push_back(next_row());
         }
       }
-      return rows;
+      return std::move(rows);
     }
 
     std::vector<std::string> cols() {
@@ -286,15 +285,14 @@ namespace csv {
       size_t index = 0;
       auto ignore_columns = current_dialect_->ignore_columns_;
       size_t i;
+      std::string column_name;
       size_t number_of_rows = 0;
-      std::string value = "";
       while (number_of_rows < expected_number_of_rows_) {
-        if (front(value)) {
-          std::shared_ptr<std::string> new_value = std::make_shared<std::string>(value);
-          unique_entries_[*new_value] = *new_value;
+        if (front(current_value_)) {
           i = index % columns_;
-          if (!ignore_columns_enabled_ || ignore_columns.count(headers_[i]) == 0)
-            current_row_[headers_[i]] = unique_entries_[*new_value];
+          column_name = headers_[i];
+          if (!ignore_columns_enabled_ || ignore_columns.count(column_name) == 0)
+            current_row_[column_name] = current_value_;
           index += 1;
           if (index != 0 && index % columns_ == 0) {
             rows_.try_enqueue(current_row_);
@@ -417,6 +415,7 @@ namespace csv {
     std::ifstream stream_;
     std::vector<std::string> headers_;
     robin_map<std::string, std::string> current_row_;
+    std::string current_value_;
     ConcurrentQueue<robin_map<std::string, std::string>> rows_;
     ProducerToken rows_ptoken_;
     ConsumerToken rows_ctoken_;
@@ -440,7 +439,6 @@ namespace csv {
     std::thread processing_thread_;
     bool processing_thread_started_;
 
-    robin_map<std::string, std::string> unique_entries_;
     ConcurrentQueue<std::string> values_;
     ProducerToken values_ptoken_;
     ConsumerToken values_ctoken_;
