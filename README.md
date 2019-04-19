@@ -252,9 +252,9 @@ Note: Do not provide num_rows greater than the actual number of rows in the file
 
 ```cpp
 // benchmark.cpp
-void parse(const std::string& filename, size_t num_rows) {
+void parse(const std::string& filename) {
   csv::Reader foo;
-  foo.read(filename, num_rows);
+  foo.read(filename);
   std::vector<csv::robin_map<std::string, std::string>> rows;
   while (foo.busy()) {
     if (foo.ready()) {
@@ -262,8 +262,6 @@ void parse(const std::string& filename, size_t num_rows) {
       rows.push_back(row);
     }
   }
-  auto shape = foo.shape();
-  std::cout << "(" << shape.first << " " << shape.second << ")" << std::endl;
 }
 ```
 
