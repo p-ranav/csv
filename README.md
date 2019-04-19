@@ -246,6 +246,8 @@ foo.read("bar.csv", 1000);
 auto rows = foo.rows();
 ```
 
+Note: Do not provide num_rows greater than the actual number of rows in the file - The reader will loop forever till the end of time. 
+
 ## Performance Benchmark
 
 ```cpp
