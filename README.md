@@ -252,9 +252,9 @@ Note: Do not provide num_rows greater than the actual number of rows in the file
 
 ```cpp
 // benchmark.cpp
-void parse(const std::string& filename) {
+void parse(const std::string& filename, size_t num_rows) {
   csv::Reader foo;
-  foo.read(filename);
+  foo.read(filename, num_rows);
   std::vector<csv::robin_map<std::string, std::string>> rows;
   while (foo.busy()) {
     if (foo.ready()) {
@@ -282,7 +282,7 @@ Here are the average-case execution times:
 |:---     |       ---:|  ---:|  ---:|  ---:|
 | [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 27 KB | 237 | 46 | 0.026s |
 | [Simple 3-column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | 0.523s |
-| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 2.312s |
+| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 2.232s |
 | [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 6,846,406 | 22 | 32.411s |
 
 ## Contributing
