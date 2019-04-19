@@ -33,7 +33,6 @@ SOFTWARE.
 #include <dialect.hpp>
 #include <concurrent_queue.hpp>
 #include <robin_map.hpp>
-#include <robin_set.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -298,8 +297,6 @@ namespace csv {
             current_row_[headers_[i]] = unique_entries_[*new_value];
           index += 1;
           if (index != 0 && index % columns_ == 0) {
-            for (auto&[k, v] : current_row_)
-              std::cout << k << " " << v << std::endl;
             rows_.try_enqueue(current_row_);
             number_of_rows += 1;
             number_of_rows_processed_.enqueue(number_of_rows);

@@ -43,7 +43,7 @@ namespace csv {
     char line_terminator_;
     char quote_character_;
     bool double_quote_;
-    robin_map<std::string_view, bool> ignore_columns_;
+    robin_map<std::string, bool> ignore_columns_;
     std::vector<char> trim_characters_;
     std::vector<std::string> column_names_;
     bool header_;
