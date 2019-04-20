@@ -324,6 +324,25 @@ Finally, once you're done writing rows, call ```.close()``` to stop the worker t
 foo.close();
 ```
 
+Here's an example writing 3 million lines of CSV to a file:
+
+```cpp
+csv::Writer foo("test.csv");
+foo.configure_dialect()
+  .delimiter(", ")
+  .column_names("a", "b", "c");
+
+for (long i = 0; i < 3000000; i++) {
+  auto x = std::to_string(i % 100);
+  auto y = std::to_string((i + 1) % 100);
+  auto z = std::to_string((i + 2) % 100);
+  foo.write_row(x, y, z);
+}
+foo.close();
+```
+
+The above code takes about 1.8 seconds to execute on my Surface Pro 4. 
+
 ## Contributing
 Contributions are welcome, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
