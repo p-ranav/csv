@@ -19,8 +19,9 @@
   - [No Header?](#no-header)
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
   - [Reading first N rows](#reading-first-n-rows)
-  - [Performance Benchmark](#performance-benchmark)
+  - [Performance Benchmark](#reader-performance-benchmark)
 * [Writing CSV files](#writing-csv-files)
+  - [Performance Benchmark](#writer-performance-benchmark)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -249,7 +250,7 @@ auto rows = foo.rows();
 
 Note: Do not provide num_rows greater than the actual number of rows in the file - The reader will loop forever till the end of time. 
 
-## Performance Benchmark
+## Reader Performance Benchmark
 
 ```cpp
 // benchmark.cpp
@@ -323,6 +324,8 @@ Finally, once you're done writing rows, call ```.done()``` to stop the worker th
 ```cpp
 foo.close();
 ```
+
+### Writer Performance Benchmark
 
 ## Contributing
 Contributions are welcome, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
