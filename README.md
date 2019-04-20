@@ -286,7 +286,7 @@ Here are the average-case execution times:
 
 ## Writing CSV files
 
-Simply include reader.hpp and you're good to go.
+Simply include writer.hpp and you're good to go.
 
 ```cpp
 #include <writer.hpp>
