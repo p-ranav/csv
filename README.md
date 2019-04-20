@@ -324,10 +324,6 @@ Finally, once you're done writing rows, call ```.done()``` to stop the worker th
 foo.close();
 ```
 
-Each test is run 30 times on an Intel(R) Core(TM) i7-6650-U @ 2.20 GHz CPU. 
-
-Here are the average-case execution times:
-
 ## Contributing
 Contributions are welcome, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
