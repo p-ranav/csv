@@ -286,6 +286,44 @@ Here are the average-case execution times:
 
 ## Writing CSV files
 
+Simply include reader.hpp and you're good to go.
+
+```cpp
+#include <writer.hpp>
+```
+To start writing CSV files, create a ```csv::Writer``` object and provide a filename:
+
+```cpp
+csv::Writer foo("test.csv");
+```
+
+Constructing a writer spawns a worker thread that is ready to start writing rows. Using ```.configure_dialect```, configure the dialect to be used by the writer. This is where you can specify the column names:
+
+```cpp
+foo.configure_dialect()
+  .delimiter(", ")
+  .column_names("a", "b", "c");
+```
+
+Now it's time to write rows. You can do this in multiple ways:
+
+```cpp
+foo.write_row("1", "2", "3");                                    // parameter packing
+foo.write_row({"4", "5", "6"});                                  // std::vector
+foo.write_row(std::map<std::string, std::string>{                // std::map
+  {"a", "7"}, {"b", "8"}, {"c", "9"} });
+foo.write_row(std::unordered_map<std::string, std::string>{      // std::unordered_map
+  {"a", "7"}, {"b", "8"}, {"c", "9"} });
+foo.write_row(csv::robin_map<std::string, std::string>{          // robin_map
+  {"a", "7"}, {"b", "8"}, {"c", "9"} });
+```
+
+Finally, once you're done writing rows, call ```.done()``` to stop the worker thread and close the file stream.
+
+```cpp
+foo.close();
+```
+
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
