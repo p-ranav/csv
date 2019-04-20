@@ -318,7 +318,7 @@ foo.write_row(csv::robin_map<std::string, std::string>{          // robin_map
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
 ```
 
-Finally, once you're done writing rows, call ```.done()``` to stop the worker thread and close the file stream.
+Finally, once you're done writing rows, call ```.close()``` to stop the worker thread and close the file stream.
 
 ```cpp
 foo.close();
