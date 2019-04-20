@@ -42,6 +42,13 @@ SOFTWARE.
 
 namespace csv {
 
+// Some utility structs to check template specialization
+template<typename Test, template<typename...> class Ref>
+struct is_specialization : std::false_type {};
+
+template<template<typename...> class Ref, typename... Args>
+struct is_specialization<Ref<Args...>, Ref> : std::true_type {};
+
 class Writer {
 public:
   explicit Writer(const std::string& file_name) : 
@@ -129,9 +136,23 @@ public:
   // Parameter packed write_row method
   // Accepts a variadic number of entries
   template<typename T, typename... Targs>
-  Dialect& write_row(T entry, Targs... Fargs) {
+  typename std::enable_if<!is_specialization<T, std::vector>::value, void>::type
+  write_row(T entry, Targs... Fargs) {
     current_row_entries_.push_back(entry);
     write_row(Fargs...);
+  }
+
+  void write_row(const std::vector<std::string>& row_entries) {
+    current_row_entries_ = row_entries;
+    std::string row;
+    for (size_t i = 0; i < current_row_entries_.size(); i++) {
+      row += current_row_entries_[i];
+      if (i + 1 < current_row_entries_.size())
+        row += dialects_[current_dialect_name_]->delimiter_;
+    }
+    row += dialects_[current_dialect_name_]->line_terminator_;
+    queue.enqueue(row);
+    current_row_entries_.clear();
   }
 
   void close() {
