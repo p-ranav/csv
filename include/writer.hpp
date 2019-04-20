@@ -33,6 +33,8 @@ SOFTWARE.
 #include <dialect.hpp>
 #include <concurrent_queue.hpp>
 #include <robin_map.hpp>
+#include <map>
+#include <unordered_map>
 #include <thread>
 #include <iostream>
 #include <fstream>
@@ -117,6 +119,58 @@ public:
     }
   }
 
+  template<typename T, typename... Targs>
+  typename std::enable_if<is_specialization<T, std::map>::value
+    || is_specialization<T, std::unordered_map>::value, void>::type
+  write_row(T row_map) {
+    std::vector<std::string> row_entries;
+    auto column_names = dialects_[current_dialect_name_]->column_names_;
+    for (size_t i = 0; i < column_names.size(); i++) {
+      row_entries.push_back(row_map[column_names[i]]);
+    }
+    current_row_entries_ = row_entries;
+    std::string row;
+    for (size_t i = 0; i < current_row_entries_.size(); i++) {
+      row += current_row_entries_[i];
+      if (i + 1 < current_row_entries_.size())
+        row += dialects_[current_dialect_name_]->delimiter_;
+    }
+    row += dialects_[current_dialect_name_]->line_terminator_;
+    queue.enqueue(row);
+    current_row_entries_.clear();
+  }
+
+  void write_row(robin_map<std::string, std::string> row_map) {
+    std::vector<std::string> row_entries;
+    auto column_names = dialects_[current_dialect_name_]->column_names_;
+    for (size_t i = 0; i < column_names.size(); i++) {
+      row_entries.push_back(row_map[column_names[i]]);
+    }
+    current_row_entries_ = row_entries;
+    std::string row;
+    for (size_t i = 0; i < current_row_entries_.size(); i++) {
+      row += current_row_entries_[i];
+      if (i + 1 < current_row_entries_.size())
+        row += dialects_[current_dialect_name_]->delimiter_;
+    }
+    row += dialects_[current_dialect_name_]->line_terminator_;
+    queue.enqueue(row);
+    current_row_entries_.clear();
+  }
+
+  void write_row(const std::vector<std::string>& row_entries) {
+    current_row_entries_ = row_entries;
+    std::string row;
+    for (size_t i = 0; i < current_row_entries_.size(); i++) {
+      row += current_row_entries_[i];
+      if (i + 1 < current_row_entries_.size())
+        row += dialects_[current_dialect_name_]->delimiter_;
+    }
+    row += dialects_[current_dialect_name_]->line_terminator_;
+    queue.enqueue(row);
+    current_row_entries_.clear();
+  }
+
   void write_row() {
     if (!header_written_) {
       write_header();
@@ -140,19 +194,6 @@ public:
   write_row(T entry, Targs... Fargs) {
     current_row_entries_.push_back(entry);
     write_row(Fargs...);
-  }
-
-  void write_row(const std::vector<std::string>& row_entries) {
-    current_row_entries_ = row_entries;
-    std::string row;
-    for (size_t i = 0; i < current_row_entries_.size(); i++) {
-      row += current_row_entries_[i];
-      if (i + 1 < current_row_entries_.size())
-        row += dialects_[current_dialect_name_]->delimiter_;
-    }
-    row += dialects_[current_dialect_name_]->line_terminator_;
-    queue.enqueue(row);
-    current_row_entries_.clear();
   }
 
   void close() {
