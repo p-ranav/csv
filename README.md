@@ -20,6 +20,7 @@
   - [Dealing with Empty Rows](#dealing-with-empty-rows)
   - [Reading first N rows](#reading-first-n-rows)
   - [Performance Benchmark](#performance-benchmark)
+* [Writing CSV files](#writing-csv-files)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -282,6 +283,8 @@ Here are the average-case execution times:
 | [Simple 3-column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | 0.523s |
 | [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 2.232s |
 | [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 6,846,406 | 22 | 32.411s |
+
+## Writing CSV files
 
 ## Contributing
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
