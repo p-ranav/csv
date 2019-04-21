@@ -21,7 +21,7 @@
   - [Reading first N rows](#reading-first-n-rows)
   - [Performance Benchmark](#performance-benchmark)
 * [Writing CSV files](#writing-csv-files)
-* [Contributing](#contributing)
+* [Contribution](#contribution)
 * [License](#license)
 
 ## Reading CSV files
@@ -343,7 +343,7 @@ foo.close();
 
 The above code takes about 1.8 seconds to execute on my Surface Pro 4. 
 
-## Contributing
+## Contribution
 Contributions are welcome, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
 ## License
