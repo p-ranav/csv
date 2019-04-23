@@ -5,7 +5,7 @@
 * Header-only library
 * Fast, asynchronous, multi-threaded processing using:
   - [Lock-free Concurrent Queues](https://github.com/cameron314/concurrentqueue)
-  - [Robin hood Hashing](https://github.com/Tessil/robin-map)
+  - [Robin hood Hashing](https://github.com/martinus/robin-hood-hashing)
 * Requires C++11
 * MIT License
 
@@ -43,7 +43,7 @@ This ```.read``` method is non-blocking. The reader spawns multiple threads to t
 ```cpp
 while(foo.busy()) {
   if (foo.has_row()) {
-    auto row = foo.next_row();    // Each row is a robin_map (https://github.com/Tessil/robin-map)
+    auto row = foo.next_row();    // Each row is a csv::unordered_flat_map (https://github.com/martinus/robin-hood-hashing)
     auto foo = row["foo"]         // You can use it just like an std::unordered_map
     auto bar = row["bar"];
     // do something
@@ -308,13 +308,13 @@ foo.configure_dialect()
 Now it's time to write rows. You can do this in multiple ways:
 
 ```cpp
-foo.write_row("1", "2", "3");                                    // parameter packing
-foo.write_row({"4", "5", "6"});                                  // std::vector
-foo.write_row(std::map<std::string, std::string>{                // std::map
+foo.write_row("1", "2", "3");                                     // parameter packing
+foo.write_row({"4", "5", "6"});                                   // std::vector
+foo.write_row(std::map<std::string, std::string>{                 // std::map
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
-foo.write_row(std::unordered_map<std::string, std::string>{      // std::unordered_map
+foo.write_row(std::unordered_map<std::string, std::string>{       // std::unordered_map
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
-foo.write_row(csv::robin_map<std::string, std::string>{          // robin_map
+foo.write_row(csv::unordered_flat_map<std::string, std::string>{  // csv::unordered_flat_map
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
 ```
 
