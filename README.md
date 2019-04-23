@@ -43,7 +43,7 @@ This ```.read``` method is non-blocking. The reader spawns multiple threads to t
 ```cpp
 while(foo.busy()) {
   if (foo.has_row()) {
-    auto row = foo.next_row();    // Each row is a csv::unordered_flat_map (https://github.com/martinus/robin-hood-hashing)
+    auto row = foo.next_row();    // Each row is a csv::unordered_flat_map (github.com/martinus/robin-hood-hashing)
     auto foo = row["foo"]         // You can use it just like an std::unordered_map
     auto bar = row["bar"];
     // do something
