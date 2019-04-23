@@ -29,7 +29,7 @@
 Simply include reader.hpp and you're good to go.
 
 ```cpp
-#include <reader.hpp>
+#include <csv/reader.hpp>
 ```
 To start parsing CSV files, create a ```csv::Reader``` object and call  ```.read(filename)```. 
 
@@ -289,7 +289,7 @@ Here are the average-case execution times:
 Simply include writer.hpp and you're good to go.
 
 ```cpp
-#include <writer.hpp>
+#include <csv/writer.hpp>
 ```
 To start writing CSV files, create a ```csv::Writer``` object and provide a filename:
 
