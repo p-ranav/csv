@@ -256,7 +256,7 @@ Note: Do not provide num_rows greater than the actual number of rows in the file
 void parse(const std::string& filename) {
   csv::Reader foo;
   foo.read(filename);
-  std::vector<csv::robin_map<std::string, std::string>> rows;
+  std::vector<csv::unordered_flat_map<std::string_view, std::string>> rows;
   while (foo.busy()) {
     if (foo.ready()) {
       auto row = foo.next_row();
