@@ -6,7 +6,7 @@
 * Fast, asynchronous, multi-threaded processing using:
   - [Lock-free Concurrent Queues](https://github.com/cameron314/concurrentqueue)
   - [Robin hood Hashing](https://github.com/martinus/robin-hood-hashing)
-* Requires C++11
+* Requires C++17
 * MIT License
 
 ## Table of Contents
