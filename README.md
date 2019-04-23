@@ -281,7 +281,7 @@ Here are the average-case execution times:
 |:---     |       ---:|  ---:|  ---:|  ---:|
 | [Demographic Statistics By Zip Code](https://catalog.data.gov/dataset/demographic-statistics-by-zip-code-acfc9) | 27 KB | 237 | 46 | 0.026s |
 | [Simple 3-column CSV](https://drive.google.com/file/d/0B4y6Mj_UZoTEUUliZWhLRjNHS0k/edit) | 14.1 MB | 761,817 | 3 | 0.523s |
-| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 2.232s |
+| [Majestic Million](https://blog.majestic.com/development/majestic-million-csv-daily/) | 77.7 MB | 1,000,000 | 12 | 1.972s |
 | [Crimes 2001 - Present](https://catalog.data.gov/dataset/crimes-2001-to-present-398a4) | 1.50 GB | 6,846,406 | 22 | 32.411s |
 
 ## Writing CSV files
