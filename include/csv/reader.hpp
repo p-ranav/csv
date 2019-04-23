@@ -30,9 +30,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #pragma once
-#include <dialect.hpp>
-#include <concurrent_queue.hpp>
-#include <robin_hood.hpp>
+#include <csv/dialect.hpp>
+#include <csv/concurrent_queue.hpp>
+#include <csv/robin_hood.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>

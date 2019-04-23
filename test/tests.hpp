@@ -1,7 +1,7 @@
 #pragma once
 #include <catch.hpp>
-#include <reader.hpp>
-#include <writer.hpp>
+#include <csv/reader.hpp>
+#include <csv/writer.hpp>
 
 TEST_CASE("Parse an empty CSV", "[simple csv]") {
   csv::Reader csv;
