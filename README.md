@@ -5,8 +5,8 @@
 * Header-only library
 * Fast, asynchronous, multi-threaded processing using:
   - [Lock-free Concurrent Queues](https://github.com/cameron314/concurrentqueue)
-  - [Robin hood Hashing](https://github.com/Tessil/robin-map)
-* Requires C++11
+  - [Robin hood Hashing](https://github.com/martinus/robin-hood-hashing)
+* Requires C++17
 * MIT License
 
 ## Table of Contents
@@ -29,7 +29,7 @@
 Simply include reader.hpp and you're good to go.
 
 ```cpp
-#include <reader.hpp>
+#include <csv/reader.hpp>
 ```
 To start parsing CSV files, create a ```csv::Reader``` object and call  ```.read(filename)```. 
 
@@ -43,8 +43,8 @@ This ```.read``` method is non-blocking. The reader spawns multiple threads to t
 ```cpp
 while(foo.busy()) {
   if (foo.has_row()) {
-    auto row = foo.next_row();    // Each row is a robin_map (https://github.com/Tessil/robin-map)
-    auto foo = row["foo"]         // You can use it just like an std::unordered_map
+    auto row = foo.next_row();  // Each row is a csv::unordered_flat_map (github.com/martinus/robin-hood-hashing)
+    auto foo = row["foo"]       // You can use it just like an std::unordered_map
     auto bar = row["bar"];
     // do something
   }
@@ -256,7 +256,7 @@ Note: Do not provide num_rows greater than the actual number of rows in the file
 void parse(const std::string& filename) {
   csv::Reader foo;
   foo.read(filename);
-  std::vector<csv::robin_map<std::string, std::string>> rows;
+  std::vector<csv::unordered_flat_map<std::string_view, std::string>> rows;
   while (foo.busy()) {
     if (foo.ready()) {
       auto row = foo.next_row();
@@ -267,7 +267,7 @@ void parse(const std::string& filename) {
 ```
 
 ```bash
-$ g++ -pthread -std=c++11 -O3 -Iinclude/ -o test benchmark.cpp
+$ g++ -pthread -std=c++17 -O3 -Iinclude/ -o test benchmark.cpp
 $ time ./test
 ```
 
@@ -289,7 +289,7 @@ Here are the average-case execution times:
 Simply include writer.hpp and you're good to go.
 
 ```cpp
-#include <writer.hpp>
+#include <csv/writer.hpp>
 ```
 To start writing CSV files, create a ```csv::Writer``` object and provide a filename:
 
@@ -308,13 +308,13 @@ foo.configure_dialect()
 Now it's time to write rows. You can do this in multiple ways:
 
 ```cpp
-foo.write_row("1", "2", "3");                                    // parameter packing
-foo.write_row({"4", "5", "6"});                                  // std::vector
-foo.write_row(std::map<std::string, std::string>{                // std::map
+foo.write_row("1", "2", "3");                                     // parameter packing
+foo.write_row({"4", "5", "6"});                                   // std::vector
+foo.write_row(std::map<std::string, std::string>{                 // std::map
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
-foo.write_row(std::unordered_map<std::string, std::string>{      // std::unordered_map
+foo.write_row(std::unordered_map<std::string, std::string>{       // std::unordered_map
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
-foo.write_row(csv::robin_map<std::string, std::string>{          // robin_map
+foo.write_row(csv::unordered_flat_map<std::string, std::string>{  // csv::unordered_flat_map
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
 ```
 

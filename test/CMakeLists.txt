@@ -15,7 +15,7 @@ endif()
 file(GLOB CSV_TEST_SOURCES
     "*.cpp"
     "*.hpp"
-    "../include/*.hpp"
+    "../include/csv/*.hpp"
     "inputs/*.csv"
 )
 
@@ -26,7 +26,7 @@ ADD_EXECUTABLE(CSV ${CSV_TEST_SOURCES})
 target_link_libraries(CSV ${CMAKE_THREAD_LIBS_INIT})
 INCLUDE_DIRECTORIES("../include" ".")
 set_target_properties(CSV PROPERTIES OUTPUT_NAME tests)
-set_property(TARGET CSV PROPERTY CXX_STANDARD 11)
+set_property(TARGET CSV PROPERTY CXX_STANDARD 17)
 
 # Set ${PROJECT_NAME} as the startup project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT CSV)

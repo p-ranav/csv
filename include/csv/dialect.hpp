@@ -30,9 +30,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #pragma once
+#include <csv/robin_hood.hpp>
 #include <string>
 #include <vector>
-#include <robin_map.hpp>
+#include <string_view>
 
 namespace csv {
 
@@ -43,7 +44,7 @@ namespace csv {
     char line_terminator_;
     char quote_character_;
     bool double_quote_;
-    robin_map<std::string, bool> ignore_columns_;
+    unordered_flat_map<std::string_view, bool> ignore_columns_;
     std::vector<char> trim_characters_;
     std::vector<std::string> column_names_;
     bool header_;

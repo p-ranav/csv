@@ -1,6 +1,7 @@
 #pragma once
 #include <catch.hpp>
-#include <reader.hpp>
+#include <csv/reader.hpp>
+#include <csv/writer.hpp>
 
 TEST_CASE("Parse an empty CSV", "[simple csv]") {
   csv::Reader csv;
@@ -39,7 +40,7 @@ TEST_CASE("Parse the most basic of CSV buffers", "[simple csv]") {
 TEST_CASE("Parse the most basic of CSV buffers (Iterator)", "[simple csv]") {
   csv::Reader csv;
   csv.read("inputs/test_01.csv");
-  std::vector<csv::robin_map<std::string, std::string>> rows;
+  std::vector<csv::unordered_flat_map<std::string_view, std::string>> rows;
   while (csv.busy()) {
     if (csv.ready()) {
       auto row = csv.next_row();
