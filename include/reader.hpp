@@ -32,7 +32,7 @@ SOFTWARE.
 #pragma once
 #include <dialect.hpp>
 #include <concurrent_queue.hpp>
-#include <robin_map.hpp>
+#include <robin_hood.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -44,6 +44,8 @@ SOFTWARE.
 #include <mutex>
 #include <condition_variable>
 #include <iterator>
+#include <atomic>
+#include <string_view>
 
 namespace csv {
 
@@ -67,25 +69,25 @@ namespace csv {
       ignore_columns_enabled_(false),
       trimming_enabled_(false) {
 
-      std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
+      Dialect unix_dialect;
       unix_dialect
-        ->delimiter(",")
+        .delimiter(",")
         .quote_character('"')
         .double_quote(true)
         .header(true);
       dialects_["unix"] = unix_dialect;
 
-      std::shared_ptr<Dialect> excel_dialect = std::make_shared<Dialect>();
+      Dialect excel_dialect;
       excel_dialect
-        ->delimiter(",")
+        .delimiter(",")
         .quote_character('"')
         .double_quote(true)
         .header(true);
       dialects_["excel"] = excel_dialect;
 
-      std::shared_ptr<Dialect> excel_tab_dialect = std::make_shared<Dialect>();
+      Dialect excel_tab_dialect;
       excel_tab_dialect
-        ->delimiter("\t")
+        .delimiter("\t")
         .quote_character('"')
         .double_quote(true)
         .header(true);
@@ -125,10 +127,10 @@ namespace csv {
       return result;
     }
 
-    robin_map<std::string, std::string> next_row() {
+    unordered_flat_map<std::string_view, std::string> next_row() {
       row_iterator_queue_.enqueue(next_index_);
       next_index_ += 1;
-      robin_map<std::string, std::string> result;
+      unordered_flat_map<std::string_view, std::string> result;
       rows_.try_dequeue(rows_ctoken_, result);
       return result;
     }
@@ -143,10 +145,10 @@ namespace csv {
 
       expected_number_of_rows_ = rows;
 
-      if (current_dialect_->trim_characters_.size() > 0)
+      if (current_dialect_.trim_characters_.size() > 0)
         trimming_enabled_ = true;
 
-      if (current_dialect_->ignore_columns_.size() > 0)
+      if (current_dialect_.ignore_columns_.size() > 0)
         ignore_columns_enabled_ = true;
 
       reading_thread_started_ = true;
@@ -167,20 +169,20 @@ namespace csv {
       while (std::getline(stream_, line)) {
         if (line.size() > 0 && line[line.size() - 1] == '\r')
           line.pop_back();
-        if (line != "" || (!current_dialect_->skip_empty_rows_ && line == ""))
+        if (line != "" || (!current_dialect_.skip_empty_rows_ && line == ""))
           ++expected_number_of_rows_;
       }
 
-      if (current_dialect_->header_ && expected_number_of_rows_ > 0)
+      if (current_dialect_.header_ && expected_number_of_rows_ > 0)
         expected_number_of_rows_ -= 1;
 
       stream_.clear();
       stream_.seekg(0, std::ios::beg);
 
-      if (current_dialect_->trim_characters_.size() > 0)
+      if (current_dialect_.trim_characters_.size() > 0)
         trimming_enabled_ = true;
 
-      if (current_dialect_->ignore_columns_.size() > 0)
+      if (current_dialect_.ignore_columns_.size() > 0)
         ignore_columns_enabled_ = true;
 
       reading_thread_started_ = true;
@@ -189,13 +191,12 @@ namespace csv {
 
     Dialect& configure_dialect(const std::string& dialect_name = "excel") {
       if (dialects_.find(dialect_name) != dialects_.end()) {
-        return *dialects_[dialect_name];
+        return dialects_[dialect_name];
       }
       else {
-        std::shared_ptr<Dialect> dialect_object = std::make_shared<Dialect>();
-        dialects_[dialect_name] = dialect_object;
+        dialects_[dialect_name] = Dialect();
         current_dialect_name_ = dialect_name;
-        return *dialect_object;
+        return dialects_[dialect_name];
       }
     }
 
@@ -207,7 +208,7 @@ namespace csv {
     }
 
     Dialect& get_dialect(const std::string& dialect_name) {
-      return *(dialects_[dialect_name]);
+      return dialects_[dialect_name];
     }
 
     void use_dialect(const std::string& dialect_name) {
@@ -217,8 +218,8 @@ namespace csv {
       }
     }
 
-    std::vector<robin_map<std::string, std::string>> rows() {
-      std::vector<robin_map<std::string, std::string>> rows;
+    std::vector<unordered_flat_map<std::string_view, std::string>> rows() {
+      std::vector<unordered_flat_map<std::string_view, std::string>> rows;
       while (!done()) {
         if (ready()) {
           rows.push_back(next_row());
@@ -241,10 +242,6 @@ namespace csv {
     }
 
     void read_internal() {
-      if (!current_dialect_) {
-        throw std::runtime_error("error: Dialect " + current_dialect_name_ + " not found");
-      }
-
       // Get current position
       std::streamoff length = stream_.tellg();
 
@@ -260,13 +257,13 @@ namespace csv {
       }
 
       split(first_line);
-      if (current_dialect_->header_) {
+      if (current_dialect_.header_) {
         headers_ = current_split_result_;
       }
       else {
         headers_.clear();
-        if (current_dialect_->column_names_.size() > 0) {
-          headers_ = current_dialect_->column_names_;
+        if (current_dialect_.column_names_.size() > 0) {
+          headers_ = current_dialect_.column_names_;
         }
         else {
           for (size_t i = 0; i < current_split_result_.size(); i++)
@@ -281,18 +278,16 @@ namespace csv {
       for (auto& header : headers_)
         current_row_[header] = "";
       if (ignore_columns_enabled_)
-        for (auto&kvpair : current_dialect_->ignore_columns_)
+        for (auto&kvpair : current_dialect_.ignore_columns_)
           current_row_.erase(kvpair.first);
 
       // Start processing thread
       processing_thread_ = std::thread(&Reader::process_values, this);
-      processing_mutex_.lock();
       processing_thread_started_ = true;
-      processing_mutex_.unlock();
 
       // Get lines one at a time, split on the delimiter and 
       // enqueue the split results into the values_ queue
-      bool skip_empty_rows = current_dialect_->skip_empty_rows_;
+      bool skip_empty_rows = current_dialect_.skip_empty_rows_;
       std::string row;
       size_t number_of_rows = 0;
       while (std::getline(stream_, row)) {
@@ -312,9 +307,9 @@ namespace csv {
 
     void process_values() {
       size_t index = 0;
-      auto ignore_columns = current_dialect_->ignore_columns_;
+      auto ignore_columns = current_dialect_.ignore_columns_;
       size_t i;
-      std::string column_name;
+      std::string_view column_name;
       size_t number_of_rows = 0;
       while (number_of_rows < expected_number_of_rows_) {
         if (front(current_value_)) {
@@ -336,8 +331,8 @@ namespace csv {
     std::string ltrim(std::string const& input) {
       std::string result = input;
       result.erase(result.begin(), std::find_if(result.begin(), result.end(), [=](int ch) {
-        return !(std::find(current_dialect_->trim_characters_.begin(), current_dialect_->trim_characters_.end(), ch)
-          != current_dialect_->trim_characters_.end());
+        return !(std::find(current_dialect_.trim_characters_.begin(), current_dialect_.trim_characters_.end(), ch)
+          != current_dialect_.trim_characters_.end());
       }));
       return std::move(result);
     }
@@ -346,15 +341,15 @@ namespace csv {
     std::string rtrim(std::string const& input) {
       std::string result = input;
       result.erase(std::find_if(result.rbegin(), result.rend(), [=](int ch) {
-        return !(std::find(current_dialect_->trim_characters_.begin(), current_dialect_->trim_characters_.end(), ch)
-          != current_dialect_->trim_characters_.end());
+        return !(std::find(current_dialect_.trim_characters_.begin(), current_dialect_.trim_characters_.end(), ch)
+          != current_dialect_.trim_characters_.end());
       }).base(), result.end());
       return std::move(result);
     }
 
     // trim white spaces from either end of an input string
     std::string trim(std::string const& input) {
-      if (current_dialect_->trim_characters_.size() == 0)
+      if (current_dialect_.trim_characters_.size() == 0)
         return input;
       return ltrim(rtrim(input));
     }
@@ -375,16 +370,16 @@ namespace csv {
 
         // Check if ch is the start of a delimiter sequence
         bool delimiter_detected = false;
-        for (size_t j = 0; j < current_dialect_->delimiter_.size(); ++j) {
+        for (size_t j = 0; j < current_dialect_.delimiter_.size(); ++j) {
 
           char ch = input_string[i];
-          if (ch != current_dialect_->delimiter_[j]) {
+          if (ch != current_dialect_.delimiter_[j]) {
             delimiter_detected = false;
             break;
           }
           else {
             // ch *might* be the start of a delimiter sequence
-            if (j + 1 == current_dialect_->delimiter_.size()) {
+            if (j + 1 == current_dialect_.delimiter_.size()) {
               if (quotes_encountered % 2 == 0) {
                 // Reached end of delimiter sequence without breaking
                 // delimiter detected!
@@ -394,7 +389,7 @@ namespace csv {
 
                 // If enabled, skip initial space right after delimiter
                 if (i + 1 < input_string_size) {
-                  if (current_dialect_->skip_initial_space_ && input_string[i + 1] == ' ') {
+                  if (current_dialect_.skip_initial_space_ && input_string[i + 1] == ' ') {
                     i = i + 1;
                   }
                 }
@@ -418,10 +413,10 @@ namespace csv {
         if (!delimiter_detected)
           sub_result += input_string[i];
 
-        if (input_string[i] == current_dialect_->quote_character_)
+        if (input_string[i] == current_dialect_.quote_character_)
           quotes_encountered += 1;
-        if (input_string[i] == current_dialect_->quote_character_ &&
-          current_dialect_->double_quote_ &&
+        if (input_string[i] == current_dialect_.quote_character_ &&
+          current_dialect_.double_quote_ &&
           sub_result.size() >= 2 &&
           sub_result[sub_result.size() - 2] == input_string[i])
           quotes_encountered -= 1;
@@ -443,37 +438,33 @@ namespace csv {
     std::string filename_;
     std::ifstream stream_;
     std::vector<std::string> headers_;
-    robin_map<std::string, std::string> current_row_;
+    unordered_flat_map<std::string_view, std::string> current_row_;
     std::string current_value_;
-    ConcurrentQueue<robin_map<std::string, std::string>> rows_;
+    ConcurrentQueue<unordered_flat_map<std::string_view, std::string>> rows_;
     ProducerToken rows_ptoken_;
     ConsumerToken rows_ctoken_;
     ConcurrentQueue<size_t> number_of_rows_processed_;
 
-    std::mutex processing_mutex_;
-
     // Member variables to keep track of rows/cols
     size_t columns_;
     size_t expected_number_of_rows_;
-    std::mutex entries_mutex_;
 
     // Member variables to enable streaming
     ConcurrentQueue<size_t> row_iterator_queue_;
     size_t row_iterator_index_;
-    std::mutex size_mutex_;
 
     std::thread reading_thread_;
     bool reading_thread_started_;
 
     std::thread processing_thread_;
-    bool processing_thread_started_;
+    std::atomic<bool> processing_thread_started_;
 
     ConcurrentQueue<std::string> values_;
     ProducerToken values_ptoken_;
     ConsumerToken values_ctoken_;
     std::string current_dialect_name_;
-    robin_map<std::string, std::shared_ptr<Dialect>> dialects_;
-    std::shared_ptr<Dialect> current_dialect_;
+    unordered_flat_map<std::string, Dialect> dialects_;
+    Dialect current_dialect_;
     size_t done_index_;
     size_t ready_index_;
     size_t next_index_;

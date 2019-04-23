@@ -32,7 +32,7 @@ SOFTWARE.
 #pragma once
 #include <dialect.hpp>
 #include <concurrent_queue.hpp>
-#include <robin_map.hpp>
+#include <robin_hood.hpp>
 #include <map>
 #include <unordered_map>
 #include <thread>
@@ -57,25 +57,25 @@ public:
     header_written_(false),
     current_dialect_name_("excel") {
     file_stream.open(file_name);
-    std::shared_ptr<Dialect> unix_dialect = std::make_shared<Dialect>();
+    Dialect unix_dialect;
     unix_dialect
-      ->delimiter(",")
+      .delimiter(",")
       .quote_character('"')
       .double_quote(true)
       .header(true);
     dialects_["unix"] = unix_dialect;
 
-    std::shared_ptr<Dialect> excel_dialect = std::make_shared<Dialect>();
+    Dialect excel_dialect;
     excel_dialect
-      ->delimiter(",")
+      .delimiter(",")
       .quote_character('"')
       .double_quote(true)
       .header(true);
     dialects_["excel"] = excel_dialect;
 
-    std::shared_ptr<Dialect> excel_tab_dialect = std::make_shared<Dialect>();
+    Dialect excel_tab_dialect;
     excel_tab_dialect
-      ->delimiter("\t")
+      .delimiter("\t")
       .quote_character('"')
       .double_quote(true)
       .header(true);
@@ -91,13 +91,12 @@ public:
 
   Dialect& configure_dialect(const std::string& dialect_name = "excel") {
     if (dialects_.find(dialect_name) != dialects_.end()) {
-      return *dialects_[dialect_name];
+      return dialects_[dialect_name];
     }
     else {
-      std::shared_ptr<Dialect> dialect_object = std::make_shared<Dialect>();
-      dialects_[dialect_name] = dialect_object;
+      dialects_[dialect_name] = Dialect();
       current_dialect_name_ = dialect_name;
-      return *dialect_object;
+      return dialects_[dialect_name];
     }
   }
 
@@ -109,7 +108,7 @@ public:
   }
 
   Dialect& get_dialect(const std::string& dialect_name) {
-    return *(dialects_[dialect_name]);
+    return dialects_[dialect_name];
   }
 
   void use_dialect(const std::string& dialect_name) {
@@ -124,7 +123,7 @@ public:
     || is_specialization<T, std::unordered_map>::value, void>::type
   write_row(T row_map) {
     std::vector<std::string> row_entries;
-    auto column_names = dialects_[current_dialect_name_]->column_names_;
+    auto column_names = dialects_[current_dialect_name_].column_names_;
     for (size_t i = 0; i < column_names.size(); i++) {
       row_entries.push_back(row_map[column_names[i]]);
     }
@@ -133,16 +132,16 @@ public:
     for (size_t i = 0; i < current_row_entries_.size(); i++) {
       row += current_row_entries_[i];
       if (i + 1 < current_row_entries_.size())
-        row += dialects_[current_dialect_name_]->delimiter_;
+        row += dialects_[current_dialect_name_].delimiter_;
     }
-    row += dialects_[current_dialect_name_]->line_terminator_;
+    row += dialects_[current_dialect_name_].line_terminator_;
     queue.enqueue(row);
     current_row_entries_.clear();
   }
 
-  void write_row(robin_map<std::string, std::string> row_map) {
+  void write_row(unordered_flat_map<std::string, std::string> row_map) {
     std::vector<std::string> row_entries;
-    auto column_names = dialects_[current_dialect_name_]->column_names_;
+    auto column_names = dialects_[current_dialect_name_].column_names_;
     for (size_t i = 0; i < column_names.size(); i++) {
       row_entries.push_back(row_map[column_names[i]]);
     }
@@ -151,9 +150,9 @@ public:
     for (size_t i = 0; i < current_row_entries_.size(); i++) {
       row += current_row_entries_[i];
       if (i + 1 < current_row_entries_.size())
-        row += dialects_[current_dialect_name_]->delimiter_;
+        row += dialects_[current_dialect_name_].delimiter_;
     }
-    row += dialects_[current_dialect_name_]->line_terminator_;
+    row += dialects_[current_dialect_name_].line_terminator_;
     queue.enqueue(row);
     current_row_entries_.clear();
   }
@@ -164,9 +163,9 @@ public:
     for (size_t i = 0; i < current_row_entries_.size(); i++) {
       row += current_row_entries_[i];
       if (i + 1 < current_row_entries_.size())
-        row += dialects_[current_dialect_name_]->delimiter_;
+        row += dialects_[current_dialect_name_].delimiter_;
     }
-    row += dialects_[current_dialect_name_]->line_terminator_;
+    row += dialects_[current_dialect_name_].line_terminator_;
     queue.enqueue(row);
     current_row_entries_.clear();
   }
@@ -180,9 +179,9 @@ public:
     for (size_t i = 0; i < current_row_entries_.size(); i++) {
       row += current_row_entries_[i];
       if (i + 1 < current_row_entries_.size())
-        row += dialects_[current_dialect_name_]->delimiter_;
+        row += dialects_[current_dialect_name_].delimiter_;
     }
-    row += dialects_[current_dialect_name_]->line_terminator_;
+    row += dialects_[current_dialect_name_].line_terminator_;
     queue.enqueue(row);
     current_row_entries_.clear();
   }
@@ -204,11 +203,11 @@ private:
 
   void write_header() {
     auto dialect = dialects_[current_dialect_name_];
-    auto column_names = dialect->column_names_;
+    auto column_names = dialect.column_names_;
     if (column_names.size() == 0)
       return;
-    auto delimiter = dialect->delimiter_;
-    auto line_terminator = dialect->line_terminator_;
+    auto delimiter = dialect.delimiter_;
+    auto line_terminator = dialect.line_terminator_;
     std::string row;
     for (size_t i = 0; i < column_names.size(); i++) {
       row += column_names[i];
@@ -242,8 +241,8 @@ private:
   std::future<bool> done_future;
   ConcurrentQueue<std::string> queue;
   std::string current_dialect_name_;
-  robin_map<std::string, std::shared_ptr<Dialect>> dialects_;
-  std::shared_ptr<Dialect> current_dialect_;
+  unordered_flat_map<std::string, Dialect> dialects_;
+  Dialect current_dialect_;
   std::vector<std::string> current_row_entries_;
   bool header_written_;
 };
