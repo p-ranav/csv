@@ -267,7 +267,7 @@ void parse(const std::string& filename) {
 ```
 
 ```bash
-$ g++ -pthread -std=c++11 -O3 -Iinclude/ -o test benchmark.cpp
+$ g++ -pthread -std=c++17 -O3 -Iinclude/ -o test benchmark.cpp
 $ time ./test
 ```
 
