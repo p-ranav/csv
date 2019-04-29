@@ -1,4 +1,6 @@
-# CSV for Modern C++
+<p align="center">
+  <img height="90" src="https://i.imgur.com/bEG2Udy.png" alt="pprint"/>
+</p>
 
 ## Highlights
 
