@@ -320,6 +320,17 @@ foo.write_row(csv::unordered_flat_map<std::string, std::string>{  // csv::unorde
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
 ```
 
+You can also omit one or more values dynamically when using maps:
+
+```
+foo.write_row(std::map<std::string, std::string>{                 // std::map
+  {"a", "7"}, {"c", "9"} });                                      // omitting "b"
+foo.write_row(std::unordered_map<std::string, std::string>{       // std::unordered_map
+  {"b", "8"}, {"c", "9"} });                                      // omitting "a"
+foo.write_row(csv::unordered_flat_map<std::string, std::string>{  // csv::unordered_flat_map
+  {"a", "7"}, {"b", "8"} });                                      // omitting "c"
+```
+
 Finally, once you're done writing rows, call ```.close()``` to stop the worker thread and close the file stream.
 
 ```cpp
