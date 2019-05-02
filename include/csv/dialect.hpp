@@ -38,16 +38,18 @@ SOFTWARE.
 namespace csv {
 
   struct Dialect {
+
     std::string delimiter_;
     bool skip_initial_space_;
-    bool skip_empty_rows_;
     char line_terminator_;
     char quote_character_;
     bool double_quote_;
-    unordered_flat_map<std::string_view, bool> ignore_columns_;
     std::vector<char> trim_characters_;
-    std::vector<std::string> column_names_;
     bool header_;
+    bool skip_empty_rows_;
+      
+    unordered_flat_map<std::string_view, bool> ignore_columns_;
+    std::vector<std::string> column_names_;
 
     Dialect() :
       delimiter_(","),
