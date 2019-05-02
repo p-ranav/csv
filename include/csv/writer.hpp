@@ -235,6 +235,9 @@ private:
     file_stream.close();
   }
 
+  Dialect current_dialect_;
+  bool header_written_;
+ 
   std::ofstream file_stream;
   std::thread thread;
   std::promise<bool> done_promise;
@@ -242,9 +245,9 @@ private:
   ConcurrentQueue<std::string> queue;
   std::string current_dialect_name_;
   unordered_flat_map<std::string, Dialect> dialects_;
-  Dialect current_dialect_;
+
   std::vector<std::string> current_row_entries_;
-  bool header_written_;
+ 
 };
 
 }
