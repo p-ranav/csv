@@ -378,6 +378,7 @@ ctest --output-on-failure -C Debug
 git clone https://github.com/p-ranav/csv.git
 mkdir build
 cd build
+cmake ../.
 sudo make install
 ```
 
