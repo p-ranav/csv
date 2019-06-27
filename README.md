@@ -23,7 +23,9 @@
   - [Reading first N rows](#reading-first-n-rows)
   - [Performance Benchmark](#performance-benchmark)
 * [Writing CSV files](#writing-csv-files)
-* [Contribution](#contribution)
+* [Steps For Contributors](#steps-for-contributors)
+* [Steps For Users](#steps-for-users)
+* [Continuous Integration Reports](continuous-integration-reports)
 * [License](#license)
 
 ## Reading CSV files
@@ -356,8 +358,33 @@ foo.close();
 
 The above code takes about 1.8 seconds to execute on my Surface Pro 4. 
 
-## Contribution
+## Steps For Contributors
+
 Contributions are welcome, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
+
+```sh
+git clone https://github.com/p-ranav/csv.git
+git submodule update --init --recursive
+mkdir build
+cd build
+cmake .. -DCSV_BUILD_TESTS=ON
+cmake --build . --config Debug
+ctest --output-on-failure -C Debug
+```
+
+## Steps For Users
+
+```sh
+git clone https://github.com/p-ranav/csv.git
+mkdir build
+cd build
+sudo make install
+```
+
+## Continuous Integration Reports
+
+- [AppVeyor](https://ci.appveyor.com/project/p-ranav/csv)
+- [Travis CI](https://travis-ci.org/p-ranav/csv)
 
 ## License
 The project is available under the [MIT](https://opensource.org/licenses/MIT) license.
