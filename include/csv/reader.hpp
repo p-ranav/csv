@@ -225,6 +225,14 @@ namespace csv {
           rows.push_back(next_row());
         }
       }
+
+      // Done but not really
+      while (rows.size() < expected_number_of_rows_) {
+        if (ready()) {
+          rows.push_back(next_row());
+        }
+      }
+
       return std::move(rows);
     }
 
@@ -290,6 +298,7 @@ namespace csv {
       bool skip_empty_rows = current_dialect_.skip_empty_rows_;
       std::string row;
       size_t number_of_rows = 0;
+
       while (std::getline(stream_, row)) {
         if (number_of_rows == expected_number_of_rows_)
           break;
@@ -302,6 +311,7 @@ namespace csv {
           number_of_rows += 1;
         }
       }
+
       stream_.close();
     }
 

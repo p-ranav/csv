@@ -476,3 +476,16 @@ TEST_CASE("Parse CSV with too many columns", "[simple csv]") {
   REQUIRE(rows[1]["b"] == "7");
   REQUIRE(rows[1]["c"] == "");
 }
+
+TEST_CASE("Parse single row", "[simple csv]") {
+  csv::Reader csv;
+  csv.configure_dialect()
+    .delimiter(",")
+    .trim_characters(' ');
+  csv.read("inputs/single_row.csv");
+  auto rows = csv.rows();
+  REQUIRE(rows.size() == 1);
+  REQUIRE(rows[0]["a"] == "1");
+  REQUIRE(rows[0]["b"] == "2");
+  REQUIRE(rows[0]["c"] == "3");
+}
