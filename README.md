@@ -364,6 +364,7 @@ Contributions are welcome, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ```sh
 git clone https://github.com/p-ranav/csv.git
+cd csv
 git submodule update --init --recursive
 mkdir build
 cd build
@@ -376,6 +377,7 @@ ctest --output-on-failure -C Debug
 
 ```sh
 git clone https://github.com/p-ranav/csv.git
+cd csv
 mkdir build
 cd build
 cmake ../.
