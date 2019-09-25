@@ -1,5 +1,6 @@
-#pragma once
-#include <catch.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+#include <iostream>
 #include <csv/reader.hpp>
 #include <csv/writer.hpp>
 
@@ -474,4 +475,76 @@ TEST_CASE("Parse CSV with too many columns", "[simple csv]") {
   REQUIRE(rows[1]["a"] == "6");
   REQUIRE(rows[1]["b"] == "7");
   REQUIRE(rows[1]["c"] == "");
+}
+
+TEST_CASE("Parse single row", "[simple csv]") {
+  csv::Reader csv;
+  csv.configure_dialect()
+    .delimiter(",")
+    .trim_characters(' ');
+  csv.read("inputs/single_row.csv");
+  auto rows = csv.rows();
+  REQUIRE(rows.size() == 1);
+  REQUIRE(rows[0]["a"] == "1");
+  REQUIRE(rows[0]["b"] == "2");
+  REQUIRE(rows[0]["c"] == "3");
+}
+
+TEST_CASE("Parse exceptions", "[simple csv]") {
+  csv::Reader csv;
+  csv.use_dialect("excel");
+  csv.configure_dialect("excel")
+    .trim_characters(' ');
+  csv.read("inputs/exceptions.csv");
+  auto rows = csv.rows();
+
+  REQUIRE(rows.size() == 6);
+
+  REQUIRE(rows[0]["Type"] == "0");
+  REQUIRE(rows[0]["Code"] == "1");
+  REQUIRE(rows[0]["Message"] == "My exception 1");
+  REQUIRE(rows[0]["Component"] == "EnergoKodInstrumentyTest");
+  REQUIRE(rows[0]["File"] == "/home/szyk/!-EnergoKod/!-Libs/EnergoKodInstrumenty/Tests/Src/ExceptionsTest.cpp");
+  REQUIRE(rows[0]["Line"] == "54");
+  REQUIRE(rows[0]["Function"] == "virtual void ExceptionsTest::run()");
+
+  REQUIRE(rows[1]["Type"] == "0");
+  REQUIRE(rows[1]["Code"] == "1");
+  REQUIRE(rows[1]["Message"] == "My exception 2");
+  REQUIRE(rows[1]["Component"] == "EnergoKodInstrumentyTest");
+  REQUIRE(rows[1]["File"] == "/home/szyk/!-EnergoKod/!-Libs/EnergoKodInstrumenty/Tests/Src/ExceptionsTest.cpp");
+  REQUIRE(rows[1]["Line"] == "60");
+  REQUIRE(rows[1]["Function"] == "virtual void ExceptionsTest::run()");
+
+  REQUIRE(rows[2]["Type"] == "0");
+  REQUIRE(rows[2]["Code"] == "1");
+  REQUIRE(rows[2]["Message"] == "My exception 3");
+  REQUIRE(rows[2]["Component"] == "EnergoKodInstrumentyTest");
+  REQUIRE(rows[2]["File"] == "/home/szyk/!-EnergoKod/!-Libs/EnergoKodInstrumenty/Tests/Src/ExceptionsTest.cpp");
+  REQUIRE(rows[2]["Line"] == "66");
+  REQUIRE(rows[2]["Function"] == "virtual void ExceptionsTest::run()");
+
+  REQUIRE(rows[3]["Type"] == "1");
+  REQUIRE(rows[3]["Code"] == "2");
+  REQUIRE(rows[3]["Message"] == "My warning 1");
+  REQUIRE(rows[3]["Component"] == "EnergoKodInstrumentyTest");
+  REQUIRE(rows[3]["File"] == "/home/szyk/!-EnergoKod/!-Libs/EnergoKodInstrumenty/Tests/Src/ExceptionsTest.cpp");
+  REQUIRE(rows[3]["Line"] == "70");
+  REQUIRE(rows[3]["Function"] == "virtual void ExceptionsTest::run()");
+
+  REQUIRE(rows[4]["Type"] == "1");
+  REQUIRE(rows[4]["Code"] == "2");
+  REQUIRE(rows[4]["Message"] == "My warning 2");
+  REQUIRE(rows[4]["Component"] == "EnergoKodInstrumentyTest");
+  REQUIRE(rows[4]["File"] == "/home/szyk/!-EnergoKod/!-Libs/EnergoKodInstrumenty/Tests/Src/ExceptionsTest.cpp");
+  REQUIRE(rows[4]["Line"] == "71");
+  REQUIRE(rows[4]["Function"] == "virtual void ExceptionsTest::run()");
+
+  REQUIRE(rows[5]["Type"] == "1");
+  REQUIRE(rows[5]["Code"] == "2");
+  REQUIRE(rows[5]["Message"] == "My warning 3");
+  REQUIRE(rows[5]["Component"] == "EnergoKodInstrumentyTest");
+  REQUIRE(rows[5]["File"] == "/home/szyk/!-EnergoKod/!-Libs/EnergoKodInstrumenty/Tests/Src/ExceptionsTest.cpp");
+  REQUIRE(rows[5]["Line"] == "72");
+  REQUIRE(rows[5]["Function"] == "virtual void ExceptionsTest::run()");
 }

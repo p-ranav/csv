@@ -23,7 +23,9 @@
   - [Reading first N rows](#reading-first-n-rows)
   - [Performance Benchmark](#performance-benchmark)
 * [Writing CSV files](#writing-csv-files)
-* [Contribution](#contribution)
+* [Steps For Contributors](#steps-for-contributors)
+* [Steps For Users](#steps-for-users)
+* [Continuous Integration Reports](continuous-integration-reports)
 * [License](#license)
 
 ## Reading CSV files
@@ -320,6 +322,17 @@ foo.write_row(csv::unordered_flat_map<std::string, std::string>{  // csv::unorde
   {"a", "7"}, {"b", "8"}, {"c", "9"} });
 ```
 
+You can also omit one or more values dynamically when using maps:
+
+```
+foo.write_row(std::map<std::string, std::string>{                 // std::map
+  {"a", "7"}, {"c", "9"} });                                      // omitting "b"
+foo.write_row(std::unordered_map<std::string, std::string>{       // std::unordered_map
+  {"b", "8"}, {"c", "9"} });                                      // omitting "a"
+foo.write_row(csv::unordered_flat_map<std::string, std::string>{  // csv::unordered_flat_map
+  {"a", "7"}, {"b", "8"} });                                      // omitting "c"
+```
+
 Finally, once you're done writing rows, call ```.close()``` to stop the worker thread and close the file stream.
 
 ```cpp
@@ -345,8 +358,36 @@ foo.close();
 
 The above code takes about 1.8 seconds to execute on my Surface Pro 4. 
 
-## Contribution
+## Steps For Contributors
+
 Contributions are welcome, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
+
+```sh
+git clone https://github.com/p-ranav/csv.git
+cd csv
+git submodule update --init --recursive
+mkdir build
+cd build
+cmake .. -DCSV_BUILD_TESTS=ON
+cmake --build . --config Debug
+ctest --output-on-failure -C Debug
+```
+
+## Steps For Users
+
+```sh
+git clone https://github.com/p-ranav/csv.git
+cd csv
+mkdir build
+cd build
+cmake ../.
+sudo make install
+```
+
+## Continuous Integration Reports
+
+- [AppVeyor](https://ci.appveyor.com/project/p-ranav/csv)
+- [Travis CI](https://travis-ci.org/p-ranav/csv)
 
 ## License
 The project is available under the [MIT](https://opensource.org/licenses/MIT) license.

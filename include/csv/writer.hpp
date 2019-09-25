@@ -122,6 +122,10 @@ public:
   typename std::enable_if<is_specialization<T, std::map>::value
     || is_specialization<T, std::unordered_map>::value, void>::type
   write_row(T row_map) {
+    if (!header_written_) {
+      write_header();
+      header_written_ = true;
+    }    
     std::vector<std::string> row_entries;
     auto column_names = dialects_[current_dialect_name_].column_names_;
     for (size_t i = 0; i < column_names.size(); i++) {
@@ -140,6 +144,10 @@ public:
   }
 
   void write_row(unordered_flat_map<std::string, std::string> row_map) {
+    if (!header_written_) {
+      write_header();
+      header_written_ = true;
+    }    
     std::vector<std::string> row_entries;
     auto column_names = dialects_[current_dialect_name_].column_names_;
     for (size_t i = 0; i < column_names.size(); i++) {
@@ -158,6 +166,10 @@ public:
   }
 
   void write_row(const std::vector<std::string>& row_entries) {
+    if (!header_written_) {
+      write_header();
+      header_written_ = true;
+    }    
     current_row_entries_ = row_entries;
     std::string row;
     for (size_t i = 0; i < current_row_entries_.size(); i++) {
@@ -235,6 +247,9 @@ private:
     file_stream.close();
   }
 
+  Dialect current_dialect_;
+  bool header_written_;
+ 
   std::ofstream file_stream;
   std::thread thread;
   std::promise<bool> done_promise;
@@ -242,9 +257,9 @@ private:
   ConcurrentQueue<std::string> queue;
   std::string current_dialect_name_;
   unordered_flat_map<std::string, Dialect> dialects_;
-  Dialect current_dialect_;
+
   std::vector<std::string> current_row_entries_;
-  bool header_written_;
+ 
 };
 
 }

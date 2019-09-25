@@ -1,0 +1,16 @@
+version: '{build}'
+image:
+  - Visual Studio 2017
+  - Visual Studio 2019
+configuration:
+  - Debug
+  - Release
+before_build:
+  - git submodule update --init --recursive
+  - mkdir build
+  - cd build
+  - cmake .. -DCSV_BUILD_TESTS=ON
+build_script:
+  - cmake --build . --config %CONFIGURATION%
+test_script:
+  - ctest --output-on-failure -C %CONFIGURATION%
