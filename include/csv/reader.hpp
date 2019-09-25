@@ -225,6 +225,14 @@ namespace csv {
           rows.push_back(next_row());
         }
       }
+
+      // Done but not really
+      while (rows.size() < expected_number_of_rows_) {
+        if (ready()) {
+          rows.push_back(next_row());
+        }
+      }
+      
       return rows;
     }
 
