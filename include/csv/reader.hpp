@@ -225,7 +225,7 @@ namespace csv {
           rows.push_back(next_row());
         }
       }
-      return std::move(rows);
+      return rows;
     }
 
     std::vector<std::string> cols() {
@@ -334,7 +334,7 @@ namespace csv {
         return !(std::find(current_dialect_.trim_characters_.begin(), current_dialect_.trim_characters_.end(), ch)
           != current_dialect_.trim_characters_.end());
       }));
-      return std::move(result);
+      return result;
     }
 
     // trim white spaces from right end of an input string
@@ -344,7 +344,7 @@ namespace csv {
         return !(std::find(current_dialect_.trim_characters_.begin(), current_dialect_.trim_characters_.end(), ch)
           != current_dialect_.trim_characters_.end());
       }).base(), result.end());
-      return std::move(result);
+      return result;
     }
 
     // trim white spaces from either end of an input string
