@@ -124,7 +124,7 @@ Consider this strange, messed up log file:
 To parse this file, simply configure a new dialect that splits on "::" and trims whitespace, braces, and bracket characters.
 
 ```cpp
-csv::reader csv;
+csv::Reader csv;
 csv.configure_dialect("my strange dialect")
   .delimiter("::")
   .trim_characters(' ', '[', ']', '{', '}');   
@@ -152,7 +152,7 @@ Jane Barkley, 25, F, jane.barkley@gmail.com, MGT
 You can configure the dialect to ignore these columns like so:
 
 ```cpp
-csv::reader csv;
+csv::Reader csv;
 csv.configure_dialect("ignore meh and fez")
   .delimiter(", ")
   .ignore_columns("age", "gender");
