@@ -1,6 +1,5 @@
-<p align="center">
-  <img height="90" src="https://i.imgur.com/bEG2Udy.png" alt="pprint"/>
-</p>
+## [DEPRECATED APRIL 2020]
+This library is now deprecated. Checkout a second implementation of this library here: https://github.com/p-ranav/csv2. 
 
 ## Highlights
 
